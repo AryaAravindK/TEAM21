@@ -6,7 +6,10 @@ export const Colors = {
         text:'#565656ff',
         title:'#151515',
         iconColor: '#000000',
-        iconColorFocused : '#2F4F9A'
+        iconColorFocused : '#2F4F9A',
+
+        inputBackground : '#FFFFFF',
+        inputColor : '#000000'
 
 
 
@@ -16,5 +19,8 @@ export const Colors = {
         background:'black',
         text:'white',
         title:'#2F4F9A',
+
+        inputBackground : '#000000',
+        inputColor : '#FFFFFF'
     }
 }

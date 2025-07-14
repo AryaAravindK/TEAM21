@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Pressable } from 'react-native';
+import { View, TextInput, Button, Text, StyleSheet, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import axios from '../../lib/axios';
 import { router,Link } from 'expo-router';
 import ThemedView from '../../components/ThemedView'
@@ -28,8 +28,9 @@ export default function Register() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <Spacer height={90}></Spacer>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <ThemedView safe style={styles.container}>
+      <Spacer height={20}></Spacer>
 
       <ThemedText style={styles.title} title>Create an account</ThemedText>
       <ThemedText style={{fontSize:14}}>Welcome! please enter your details</ThemedText>
@@ -61,6 +62,7 @@ export default function Register() {
 
         <Link href="/home" style={[{color:Colors.primary},styles.link]}>Home</Link>
     </ThemedView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -86,7 +88,7 @@ const styles = StyleSheet.create({
     flex:1,
     flexDirection:'row',
     justifyContent:'center',
-    alignItems:'stretch'
+    alignItems:'stretch',
   },
   link:{
     fontSize:20,

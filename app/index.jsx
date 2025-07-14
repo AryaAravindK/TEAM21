@@ -8,12 +8,12 @@ import { router } from 'expo-router';
 
 useEffect(() => {
   setTimeout(() => {
-    router.replace('/register');
+    router.replace('/login');
   }, 2000);
 }, []);
 
 const handleRedirect = () =>{
-  router.replace('/register')
+  router.replace('/login')
 }
 
 const Home = () => {
