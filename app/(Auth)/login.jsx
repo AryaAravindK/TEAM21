@@ -9,18 +9,27 @@ import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
 import ThemedTextInput from '../../components/ThemedTextInput';
 
+import { useUser } from '../hooks/useUser';
+
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   
+  const { user, login } = useUser()
 
 
   const handleLogin = async () => {
-    console.log("Attepmt to login",email,password)
-    setTimeout(() => {
-      router.replace('/home')
-    }, 1000);
+    try {
+      await login(email,password)
+      console.log("Attepmt to login",email,password)
+      setTimeout(() => {
+        router.replace('/home')
+      }, 1000);
+    } catch (error) {
+       setError(error.message)
+    }
+    
   };
 
   return (
@@ -57,6 +66,9 @@ export default function Register() {
 
       <ThemedButton onPress = {handleLogin}><Text style={{color:'#ffffff',textAlign:'center'}}>Login</Text></ThemedButton>
       <Spacer height={50}/>
+
+        <Spacer />
+        {error && <Text style={styles.error}>{error}</Text>}
 
       <ThemedView style={styles.redirect}>
         <ThemedText style={{fontSize:20}}>Don't have an account? </ThemedText>
@@ -96,6 +108,15 @@ const styles = StyleSheet.create({
   },
   link:{
     fontSize:20,
+  },
+  error: {
+    color: Colors.warning,
+    padding: 10,
+    backgroundColor: '#f5c1c8',
+    borderColor: Colors.warning,
+    borderWidth: 1,
+    borderRadius: 6,
+    marginHorizontal: 10,
   }
 
 });

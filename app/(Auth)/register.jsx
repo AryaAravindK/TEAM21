@@ -8,22 +8,23 @@ import { Colors } from '../../constants/Colors';
 import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
 
+import { useUser } from '../hooks/useUser'
+
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
 
+  const { user , register } = useUser()
+
   const handleRegister = async () => {
     if (password !== confirm) return setError('Passwords do not match');
     try {
-      // const res = await axios.post('/register', { email, password });
-      // if (res.data.success) {
-      //   router.push({ pathname: '/verify', params: { email } });
-      // } else setError(res.data.message);
+      await register(email,password);
       router.replace('/verify')
-    } catch {
-      setError('Server error');
+    } catch(error){
+      setError(error.message);
     }
   };
 
@@ -49,7 +50,8 @@ export default function Register() {
       <ThemedText>Must be atleast 8 characters</ThemedText>
       <Spacer height={10}/>
       
-      {error ? <ThemedText style={{ color: 'red' }}>{error}</ThemedText> : null}
+      <Spacer />
+        {error && <Text style={styles.error}>{error}</Text>}
       <Spacer height={10}/>
 
       <ThemedButton onPress = {handleRegister}><Text style={{color:'#ffffff',textAlign:'center'}}>Register</Text></ThemedButton>
@@ -92,6 +94,15 @@ const styles = StyleSheet.create({
   },
   link:{
     fontSize:20,
+  },
+  error: {
+    color: 'red',
+    padding: 10,
+    backgroundColor: '#f5c1c8',
+    borderColor: Colors.warning,
+    borderWidth: 1,
+    borderRadius: 6,
+    marginHorizontal: 10,
   }
 
 });

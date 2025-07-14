@@ -3,7 +3,13 @@ import React from 'react'
 import { Stack } from 'expo-router'
 import { Colors } from '../../constants/Colors'
 
+import { useUser } from '../hooks/useUser'
+
 const AuthLayout = () => {
+
+    const { user } = useUser()
+    console.log(user)
+
     const Scheme = useColorScheme()
     const theme = Colors[Scheme] ?? Colors.light
   return (

@@ -1,5 +1,7 @@
 export const Colors = {
     primary:'#2F4F9A',
+    warning: 'orange',
+    
     light: {
         background:'#EEF6FF',
         cardBackground:'#FFFFFF',
