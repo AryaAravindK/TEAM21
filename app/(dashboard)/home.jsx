@@ -7,6 +7,7 @@ import { Colors } from '../../constants/Colors'
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
 import ThemedButton from '../../components/ThemedButton'
+import Spacer from '../../components/Spacer'
 
 const featuredEvents = [
   {
@@ -50,16 +51,13 @@ const Home = () => {
       
       {/* Header with gradient background */}
       <View style={[styles.header, { paddingTop: statusBarHeight }]}>
+        <Spacer height={20}></Spacer>
         <View style={styles.headerContent}>
           <View>
             <ThemedText style={styles.logoText}>Team21</ThemedText>
             <ThemedText style={styles.welcomeText}>Welcome, Arya</ThemedText>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.filterButton}>
-              <Ionicons name="filter" size={20} color="#666" />
-              <ThemedText style={styles.filterText}>Filters</ThemedText>
-            </TouchableOpacity>
             <Image source={{ uri: profileImg }} style={styles.profileImg} />
           </View>
         </View>
@@ -68,6 +66,7 @@ const Home = () => {
       <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
         {/* Featured Events */}
         <View style={styles.section}>
+          <Spacer height={20}></Spacer>
           <View style={styles.sectionHeader}>
             <ThemedText style={styles.sectionTitle}>Featured Events</ThemedText>
             <TouchableOpacity>
@@ -189,20 +188,6 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  filterText: {
-    color: '#666',
-    marginLeft: 4,
-    fontSize: 14,
   },
   profileImg: {
     width: 40,
