@@ -59,6 +59,7 @@ export default function Register() {
         <Link href="/login" style={[{color:Colors.primary},styles.link]}>Login</Link>
       </ThemedView>
 
+        <Link href="/home" style={[{color:Colors.primary},styles.link]}>Home</Link>
     </ThemedView>
   );
 }

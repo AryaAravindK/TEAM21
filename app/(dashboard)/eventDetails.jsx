@@ -1,25 +1,26 @@
-import { StyleSheet,  } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
 
-const event = () => {
+const eventDetails = () => {
   return (
     <ThemedView safe style={styles.container}>
-      <ThemedText style={styles.heading}>Events</ThemedText>
+      <ThemedText style={styles.heading}>Event Details</ThemedText>
     </ThemedView>
   )
 }
 
-export default event
+export default eventDetails
 
 const styles = StyleSheet.create({
-  container: {
+  container:{
     flex:1, 
     alignItem : 'center'
   },
-  heading:{
+  heading: {
     fontSize:20,
     textAlign: 'center'
   }
+
 })

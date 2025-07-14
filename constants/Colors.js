@@ -5,6 +5,9 @@ export const Colors = {
         cardBackground:'#FFFFFF',
         text:'#565656ff',
         title:'#151515',
+        iconColor: '#000000',
+        iconColorFocused : '#2F4F9A'
+
 
 
     },

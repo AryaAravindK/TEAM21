@@ -1,22 +1,30 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import Logo from '../assets/Trophy.png'
 import React from 'react'
 
 import { useEffect } from 'react';
 import { router } from 'expo-router';
 
+
 useEffect(() => {
   setTimeout(() => {
     router.replace('/register');
-  }, 1000);
+  }, 2000);
 }, []);
+
+const handleRedirect = () =>{
+  router.replace('/register')
+}
 
 const Home = () => {
   return (
-    <View style={styles.container}>
-        <Image source={Logo}></Image>
+    <>
+    <Pressable style={styles.container} onPress={handleRedirect}> 
+      <Image source={Logo}></Image>
       <Text style={styles.title}>Team21</Text>
-    </View>
+    </Pressable>
+
+    </>
   )
 }
 

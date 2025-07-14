@@ -5,12 +5,21 @@ import ThemedText from '../../components/ThemedText'
 
 const profile = () => {
   return (
-    <ThemedView style={{flex:1, justifyContent: 'center', alignItem : 'center'}}>
-      <ThemedText style={{fontSize:20,textAlign: 'center'}}>profile</ThemedText>
+    <ThemedView safe style={styles.container}>
+      <ThemedText style={styles.heading}>profile</ThemedText>
     </ThemedView>
   )
 }
 
 export default profile
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex:1, 
+    alignItem : 'center'
+  },
+  heading:{
+    fontSize:20,
+    textAlign: 'center'
+  }
+})
