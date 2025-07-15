@@ -19,7 +19,8 @@ const RootLayout = () => {
         <Stack.Screen name='index' options={{ title:'Splash', headerShown:false}}/>
         <Stack.Screen name='(Auth)' options={{  headerShown:false}}/>
         <Stack.Screen name='(dashboard)' options={{  headerShown:false}}/>
-        <Stack.Screen name='registerEvent' options={{ title:'Register Event', headerShown:false}}/>
+        <Stack.Screen name='registerEvent' options={{  headerShown:false}}/>
+        <Stack.Screen name='eventDetails' options={{  headerShown:false}}/>
 
     </Stack>
         </UserProvider>

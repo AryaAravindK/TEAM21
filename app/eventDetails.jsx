@@ -2,10 +2,10 @@ import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, St
 import React from 'react'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { Colors } from '../../constants/Colors'
+import { Colors } from '../constants/Colors'
 
-import ThemedView from '../../components/ThemedView'
-import ThemedText from '../../components/ThemedText'
+import ThemedView from '../components/ThemedView'
+import ThemedText from '../components/ThemedText'
 
 const eventData = {
   title: 'City Basketball Tournament',
@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     alignSelf: 'flex-start',
+    marginHorizontal: 'auto'
   },
   attendeeImages: {
     flexDirection: 'row',
