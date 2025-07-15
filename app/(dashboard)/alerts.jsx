@@ -72,7 +72,7 @@ const notifications = [
   },
 ]
 
-const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg' 
+const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg'
 
 const Alerts = () => {
   const navigation = useNavigation()
@@ -99,7 +99,7 @@ const Alerts = () => {
         </TouchableOpacity>
         <ThemedText style={[styles.notificationsTitle, { color: theme.title }]}>Notifications</ThemedText>
       </View>
-    
+
       <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
         {notifications.map((notif, idx) => (
           <View
@@ -117,8 +117,8 @@ const Alerts = () => {
 
             <View style={styles.iconContainer}>
               <Image
-                source={require('../../assets/bell.png')} 
-                style={[styles.bellIcon, { width: 32, height: 32 }]}
+                source={require('../../assets/bell.png')}
+                style={[styles.bellIcon, { width: 28, height: 28 }]}
                 resizeMode="contain"
               />
             </View>
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   notificationsTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   notificationBox: {
@@ -219,12 +219,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   title: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: 'bold',
     marginRight: 8,
   },
   description: {
-    fontSize: 15,
+    fontSize: 14,
     marginTop: 2,
   },
   time: {
