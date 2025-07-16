@@ -3,6 +3,7 @@ import React from 'react'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '../../constants/Colors'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
@@ -40,6 +41,46 @@ const upcomingEvents = [
 
 const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg'
 
+const quickAccess = [
+  {
+    label: 'My Certificates',
+    icon: <MaterialCommunityIcons name="certificate" size={32} color="#2563eb" />,
+    onPress: () => { },
+  },
+  {
+    label: 'Saved Events',
+    icon: <MaterialCommunityIcons name="bookmark" size={32} color="#2563eb" />,
+    onPress: () => { },
+  },
+  {
+    label: 'Event History',
+    icon: <MaterialCommunityIcons name="notebook" size={32} color="#2563eb" />,
+    onPress: () => { },
+  },
+  {
+    label: 'Leaderboard',
+    icon: <MaterialCommunityIcons name="trophy" size={32} color="#2563eb" />,
+    onPress: () => { },
+  },
+]
+
+const communityFeed = [
+  {
+    id: 1,
+    name: 'Arya',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    time: '2 hours ago',
+    message: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.'
+  },
+  {
+    id: 2,
+    name: 'Sowjanya',
+    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+    time: '2 hours ago',
+    message: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.'
+  }
+]
+
 const Home = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
   const scheme = useColorScheme()
@@ -48,7 +89,7 @@ const Home = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
-      
+
       {/* Header with gradient background */}
       <View style={[styles.header, { paddingTop: statusBarHeight }]}>
         <Spacer height={20}></Spacer>
@@ -64,6 +105,8 @@ const Home = () => {
       </View>
 
       <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+        
+
         {/* Featured Events */}
         <View style={styles.section}>
           <Spacer height={20}></Spacer>
@@ -73,11 +116,11 @@ const Home = () => {
               <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
             </TouchableOpacity>
           </View>
-          
+
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
             {featuredEvents.map((event) => (
-              <TouchableOpacity 
-                key={event.id} 
+              <TouchableOpacity
+                key={event.id}
                 style={styles.featuredCard}
                 onPress={() => router.push('/eventDetails')}
               >
@@ -92,7 +135,7 @@ const Home = () => {
                       <Ionicons name="location-outline" size={16} color="white" />
                       <ThemedText style={styles.featuredLocation}>{event.location}</ThemedText>
                     </View>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.registerButton}
                       onPress={() => router.push('/registerEvent')}
                     >
@@ -113,11 +156,11 @@ const Home = () => {
               <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
             </TouchableOpacity>
           </View>
-          
+
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
             {upcomingEvents.map((event) => (
-              <TouchableOpacity 
-                key={event.id} 
+              <TouchableOpacity
+                key={event.id}
                 style={[styles.eventCard, { backgroundColor: theme.cardBackground }]}
                 onPress={() => router.push('/eventDetails')}
               >
@@ -129,7 +172,7 @@ const Home = () => {
                       <Ionicons name="bookmark-outline" size={20} color={theme.text} />
                     </TouchableOpacity>
                   </View>
-                  
+
                   <View style={styles.eventDetails}>
                     <View style={styles.eventDetailRow}>
                       <Ionicons name="calendar-outline" size={16} color={theme.text} />
@@ -144,8 +187,8 @@ const Home = () => {
                       <ThemedText style={styles.eventDetailText}>{event.location}</ThemedText>
                     </View>
                   </View>
-                  
-                  <TouchableOpacity 
+
+                  <TouchableOpacity
                     style={[styles.eventRegisterButton, { backgroundColor: theme.primary ?? Colors.primary }]}
                     onPress={() => router.push('/registerEvent')}
                   >
@@ -155,6 +198,39 @@ const Home = () => {
               </TouchableOpacity>
             ))}
           </ScrollView>
+        </View>
+
+        <View style={styles.quickAccessSection}>
+          <ThemedText style={styles.quickAccessTitle}>Quick Access</ThemedText>
+          <View style={styles.quickAccessGrid}>
+            {quickAccess.map((item, idx) => (
+              <TouchableOpacity key={item.label} style={styles.quickAccessBtn} onPress={item.onPress}>
+                {item.icon}
+                <ThemedText style={styles.quickAccessLabel}>{item.label}</ThemedText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={styles.sectionTitle}>Community Feed</ThemedText>
+            <TouchableOpacity>
+              <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
+            </TouchableOpacity>
+          </View>
+          {communityFeed.map(feed => (
+            <View key={feed.id} style={styles.feedCard}>
+              <View style={styles.feedCardHeader}>
+                <Image source={{ uri: feed.avatar }} style={styles.feedAvatar} />
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.feedName}>{feed.name}</ThemedText>
+                  <ThemedText style={styles.feedTime}>{feed.time}</ThemedText>
+                </View>
+              </View>
+              <ThemedText style={styles.feedMessage}>{feed.message}</ThemedText>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -330,5 +406,98 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  quickAccessSection: {
+    backgroundColor: '#eaf3ff',
+    paddingHorizontal: 16,
+    // paddingTop: 16,
+    paddingBottom: 8,
+    borderRadius: 16,
+    marginHorizontal: 8,
+    marginTop: 16,
+  },
+  quickAccessTitle: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 12,
+  },
+  quickAccessGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  quickAccessBtn: {
+    width: '47%',
+    aspectRatio: 1.9,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 2,
+  },
+  quickAccessLabel: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#222',
+  },
+  communityFeedSection: {
+    marginTop: 16,
+    paddingHorizontal: 8,
+  },
+  communityFeedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  communityFeedTitle: {
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  communityFeedViewAll: {
+    color: '#2563eb',
+    fontWeight: '500',
+    fontSize: 15,
+  },
+  feedCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 2,
+  },
+  feedCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  feedAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+  },
+  feedName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  feedTime: {
+    fontSize: 12,
+    color: '#888',
+  },
+  feedMessage: {
+    fontSize: 14,
+    color: '#222',
+    marginTop: 2,
   },
 })

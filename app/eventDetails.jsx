@@ -3,6 +3,7 @@ import React from 'react'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '../constants/Colors'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ThemedView from '../components/ThemedView'
 import ThemedText from '../components/ThemedText'
@@ -11,7 +12,7 @@ const eventData = {
   title: 'City Basketball Tournament',
   date: 'May 10, 2025',
   time: '10:00 AM',
-  location: 'ABC Stadium, Tatguni, Agara, Bangalore 560018',
+  location: 'ABC Stadium, Tatguni, Agara, Bangalore Karnataka 560018',
   price: '₹500',
   image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
   attendees: '20+ Going',
@@ -27,19 +28,20 @@ const attendeeImages = [
 const EventDetails = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
   const scheme = useColorScheme()
+  const insets = useSafeAreaInsets()
   const theme = Colors[scheme] ?? Colors.light
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+    <ThemedView safe style={{ flex: 1, backgroundColor: theme.background }}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      
+
       <ScrollView style={{ flex: 1 }}>
         {/* Hero Image with Header */}
         <View style={styles.heroContainer}>
           <Image source={{ uri: eventData.image }} style={styles.heroImage} />
           <View style={[styles.heroOverlay, { paddingTop: statusBarHeight }]}>
             <View style={styles.heroHeader}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.backButton}
                 onPress={() => router.back()}
               >
@@ -49,15 +51,15 @@ const EventDetails = () => {
                 <Ionicons name="share-outline" size={24} color="white" />
               </TouchableOpacity>
             </View>
-            
+
             {/* Attendees Info */}
             <View style={styles.attendeesContainer}>
               <View style={styles.attendeeImages}>
                 {attendeeImages.map((img, index) => (
-                  <Image 
+                  <Image
                     key={index}
-                    source={{ uri: img }} 
-                    style={[styles.attendeeImage, { marginLeft: index > 0 ? -8 : 0 }]} 
+                    source={{ uri: img }}
+                    style={[styles.attendeeImage, { marginLeft: index > 0 ? -8 : 0 }]}
                   />
                 ))}
               </View>
@@ -72,23 +74,23 @@ const EventDetails = () => {
         {/* Event Details */}
         <View style={[styles.detailsContainer, { backgroundColor: theme.cardBackground }]}>
           <ThemedText style={[styles.eventTitle, { color: theme.title }]}>{eventData.title}</ThemedText>
-          
+
           <View style={styles.eventInfo}>
             <View style={styles.infoRow}>
               <Ionicons name="calendar-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.date}</ThemedText>
             </View>
-            
+
             <View style={styles.infoRow}>
               <Ionicons name="time-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.time}</ThemedText>
             </View>
-            
+
             <View style={styles.infoRow}>
               <Ionicons name="location-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.location}</ThemedText>
             </View>
-            
+
             <View style={styles.infoRow}>
               <Ionicons name="card-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.price}</ThemedText>
@@ -104,15 +106,18 @@ const EventDetails = () => {
       </ScrollView>
 
       {/* Register Button */}
-      <View style={[styles.registerContainer, { backgroundColor: theme.cardBackground }]}>
-        <TouchableOpacity 
+      <View style={[
+        styles.registerContainer,
+        { backgroundColor: theme.cardBackground, paddingBottom: insets.bottom + 5 }
+      ]}>
+        <TouchableOpacity
           style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
           onPress={() => router.push('/registerEvent')}
         >
           <ThemedText style={styles.registerButtonText}>Register Now</ThemedText>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </ThemedView>
   )
 }
 
