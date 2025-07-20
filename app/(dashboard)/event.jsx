@@ -1,55 +1,67 @@
-import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native'
-import React, { useState } from 'react'
-import { router } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { Colors } from '../../constants/Colors'
-
-import ThemedView from '../../components/ThemedView'
-import ThemedText from '../../components/ThemedText'
-
-const events = [
-  {
-    id: 1,
-    title: 'City Basketball Tournament',
-    date: 'May 10, 2025',
-    time: '10:00 AM',
-    location: 'ABC Stadium, Tatguni, Agara, Bangalore 560018',
-    image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
-    status: 'upcoming'
-  },
-  {
-    id: 2,
-    title: 'City Basketball Tournament',
-    date: 'May 15, 2025',
-    time: '2:00 PM',
-    location: 'ABC Stadium, Tatguni, Agara, Bangalore 560018',
-    image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
-    status: 'upcoming'
-  },
-  {
-    id: 3,
-    title: 'City Basketball Tournament',
-    date: 'April 28, 2025',
-    time: '10:00 AM',
-    location: 'Central Sports Arena',
-    image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
-    status: 'past'
-  }
-]
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  Platform,
+  useColorScheme,
+  ActivityIndicator,
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/Colors';
+import { getEvents } from '../services/eventService'; // ✅ Your existing service
+import ThemedText from '../../components/ThemedText';
 
 const Event = () => {
-  const [activeTab, setActiveTab] = useState('upcoming')
-  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
-  const scheme = useColorScheme()
-  const theme = Colors[scheme] ?? Colors.light
+  const [activeTab, setActiveTab] = useState('all');
+  const [allEvents, setAllEvents] = useState([]);
+  const [myEvents, setMyEvents] = useState([]); // placeholder for future
+  const [loading, setLoading] = useState(false);
 
-  const filteredEvents = events.filter(event => event.status === activeTab)
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
+  const scheme = useColorScheme();
+  const theme = Colors[scheme] ?? Colors.light;
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await getEvents();
+      const apiData = response.data ;
+
+      const formattedEvents = apiData.map((event) => ({
+        id: event.event_id,
+        title: event.event_name,
+        date: new Date(event.start_time).toDateString(),
+        time: new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        location: event.venue,
+        image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
+        registered : event.registered,
+        max_registration : event.participant_limit
+      }));
+
+      setAllEvents(formattedEvents);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const eventsToShow = activeTab === 'all' ? allEvents : myEvents;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
-      
-      {/* Header */}
+
       <View style={[styles.header, { paddingTop: statusBarHeight, backgroundColor: theme.background }]}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={theme.title} />
@@ -58,86 +70,85 @@ const Event = () => {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Tab Buttons */}
       <View style={[styles.tabContainer, { backgroundColor: theme.background }]}>
-        <TouchableOpacity 
-          style={[
-            styles.tabButton, 
-            activeTab === 'upcoming' && { backgroundColor: theme.primary ?? Colors.primary }
-          ]}
-          onPress={() => setActiveTab('upcoming')}
-        >
-          <ThemedText style={[
-            styles.tabText,
-            activeTab === 'upcoming' && { color: 'white' }
-          ]}>
-            Upcoming
-          </ThemedText>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.tabButton,
-            activeTab === 'past' && { backgroundColor: theme.primary ?? Colors.primary }
+            activeTab === 'all' && { backgroundColor: theme.primary ?? Colors.primary },
           ]}
-          onPress={() => setActiveTab('past')}
+          onPress={() => setActiveTab('all')}
         >
-          <ThemedText style={[
-            styles.tabText,
-            activeTab === 'past' && { color: 'white' }
-          ]}>
-            Past Events
+          <ThemedText style={[styles.tabText, activeTab === 'all' && { color: 'white' }]}>
+            All Events
+          </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === 'my' && { backgroundColor: theme.primary ?? Colors.primary },
+          ]}
+          onPress={() => setActiveTab('my')}
+        >
+          <ThemedText style={[styles.tabText, activeTab === 'my' && { color: 'white' }]}>
+            My Events
           </ThemedText>
         </TouchableOpacity>
       </View>
 
-      {/* Events List */}
       <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-        {filteredEvents.map((event) => (
-          <TouchableOpacity 
-            key={event.id}
-            style={[styles.eventCard, { backgroundColor: theme.cardBackground }]}
-            onPress={() => router.push('/eventDetails')}
-          >
-            <Image source={{ uri: event.image }} style={styles.eventImage} />
-            <View style={styles.eventContent}>
-              <View style={styles.eventHeader}>
-                <ThemedText style={[styles.eventTitle, { color: theme.title }]}>{event.title}</ThemedText>
-                <TouchableOpacity>
+        {loading ? (
+          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+        ) : eventsToShow.length === 0 ? (
+          <ThemedText style={{ textAlign: 'center', marginTop: 20 }}>
+            {activeTab === 'all' ? 'No events available.' : 'You have no past events.'}
+          </ThemedText>
+        ) : (
+          eventsToShow.map((event) => (
+            <TouchableOpacity
+              key={event.id}
+              style={[styles.eventCard, { backgroundColor: theme.cardBackground }]}
+              onPress={() => router.push(`/eventDetails?event_id=${event.id}`)}
+            >
+              <Image source={{ uri: event.image }} style={styles.eventImage} />
+              <View style={styles.eventContent}>
+                <View style={styles.eventHeader}>
+                  <ThemedText style={[styles.eventTitle, { color: theme.title }]}>
+                    {event.title}
+                  </ThemedText>
                   <Ionicons name="bookmark-outline" size={20} color={theme.text} />
+                </View>
+
+                <View style={styles.eventDetails}>
+                  <View style={styles.eventDetailRow}>
+                    <Ionicons name="calendar-outline" size={16} color={theme.text} />
+                    <ThemedText style={styles.eventDetailText}>{event.date}</ThemedText>
+                  </View>
+                  <View style={styles.eventDetailRow}>
+                    <Ionicons name="time-outline" size={16} color={theme.text} />
+                    <ThemedText style={styles.eventDetailText}>{event.time}</ThemedText>
+                  </View>
+                  <View style={styles.eventDetailRow}>
+                    <Ionicons name="location-outline" size={16} color={theme.text} />
+                    <ThemedText style={styles.eventDetailText}>{event.location}</ThemedText>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
+                >
+                  <ThemedText style={styles.registerButtonText}>Register</ThemedText>
                 </TouchableOpacity>
               </View>
-              
-              <View style={styles.eventDetails}>
-                <View style={styles.eventDetailRow}>
-                  <Ionicons name="calendar-outline" size={16} color={theme.text} />
-                  <ThemedText style={styles.eventDetailText}>{event.date}</ThemedText>
-                </View>
-                <View style={styles.eventDetailRow}>
-                  <Ionicons name="time-outline" size={16} color={theme.text} />
-                  <ThemedText style={styles.eventDetailText}>{event.time}</ThemedText>
-                </View>
-                <View style={styles.eventDetailRow}>
-                  <Ionicons name="location-outline" size={16} color={theme.text} />
-                  <ThemedText style={styles.eventDetailText}>{event.location}</ThemedText>
-                </View>
-              </View>
-              
-              <TouchableOpacity 
-                style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
-                onPress={() => router.push('/registerEvent')}
-              >
-                <ThemedText style={styles.registerButtonText}>Register</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default Event
+export default Event;
 
 const styles = StyleSheet.create({
   header: {
@@ -220,4 +231,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
-})
+});

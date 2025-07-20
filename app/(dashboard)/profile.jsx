@@ -6,6 +6,7 @@ import { Colors } from '../../constants/Colors'
 
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
+import { useAuth } from '../hooks/useAuth'
 
 const profileData = {
   name: 'Arya Khaded, 21',
@@ -42,10 +43,19 @@ const participationHistory = [
   }
 ]
 
+
+
 const Profile = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
   const scheme = useColorScheme()
   const theme = Colors[scheme] ?? Colors.light
+  const { logout } = useAuth();
+
+  function handleLogout(){
+  logout();
+  console.log("Logging out..")
+  router.replace('/login')
+}
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -159,7 +169,7 @@ const Profile = () => {
               <Ionicons name="chevron-forward" size={20} color="#888" />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.logoutButton}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
           </TouchableOpacity>
         </View>

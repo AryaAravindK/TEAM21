@@ -1,243 +1,248 @@
-import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native'
-import React from 'react'
-import { router } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { Colors } from '../../constants/Colors'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/Colors';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import ThemedView from '../../components/ThemedView'
-import ThemedText from '../../components/ThemedText'
-import ThemedButton from '../../components/ThemedButton'
-import Spacer from '../../components/Spacer'
+import ThemedView from '../../components/ThemedView';
+import ThemedText from '../../components/ThemedText';
+import ThemedButton from '../../components/ThemedButton';
+import Spacer from '../../components/Spacer';
+import { getEvents } from '../services/eventService';
 
-const featuredEvents = [
-  {
-    id: 1,
-    title: 'Basketball Tournament',
-    date: '10 Aug',
-    location: 'ABC Stadium, Tatguni, Agara, Bangalore - 560018',
-    image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800'
-  }
-]
-
-const upcomingEvents = [
-  {
-    id: 1,
-    title: 'City Basketball Tournament',
-    date: 'May 10, 2025',
-    time: '10:00 AM',
-    location: 'ABC Stadium, Tatguni, Agara, Bangalore 560018',
-    image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800'
-  },
-  {
-    id: 2,
-    title: 'City Basketball Tournament',
-    date: 'May 15, 2025',
-    time: '2:00 PM',
-    location: 'XYZ Arena, Koramangala, Bangalore 560034',
-    image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800'
-  }
-]
-
-const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg'
+const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg';
+const defaultEventImg = 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800';
 
 const quickAccess = [
-  {
-    label: 'My Certificates',
-    icon: <MaterialCommunityIcons name="certificate" size={32} color="#2563eb" />,
-    onPress: () => { },
-  },
-  {
-    label: 'Saved Events',
-    icon: <MaterialCommunityIcons name="bookmark" size={32} color="#2563eb" />,
-    onPress: () => { },
-  },
-  {
-    label: 'Event History',
-    icon: <MaterialCommunityIcons name="notebook" size={32} color="#2563eb" />,
-    onPress: () => { },
-  },
-  {
-    label: 'Leaderboard',
-    icon: <MaterialCommunityIcons name="trophy" size={32} color="#2563eb" />,
-    onPress: () => { },
-  },
-]
+    { label: 'My Certificates', icon: <MaterialCommunityIcons name="certificate" size={32} color="#2563eb" />, onPress: () => { }, },
+    { label: 'Saved Events', icon: <MaterialCommunityIcons name="bookmark" size={32} color="#2563eb" />, onPress: () => { }, },
+    { label: 'Event History', icon: <MaterialCommunityIcons name="notebook" size={32} color="#2563eb" />, onPress: () => { }, },
+    { label: 'Leaderboard', icon: <MaterialCommunityIcons name="trophy" size={32} color="#2563eb" />, onPress: () => { }, },
+];
 
 const communityFeed = [
-  {
-    id: 1,
-    name: 'Arya',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    time: '2 hours ago',
-    message: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.'
-  },
-  {
-    id: 2,
-    name: 'Sowjanya',
-    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    time: '2 hours ago',
-    message: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.'
-  }
-]
+    { id: 1, name: 'Arya', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', time: '2 hours ago', message: 'Community feed post example.' },
+    { id: 2, name: 'Sowjanya', avatar: 'https://randomuser.me/api/portraits/women/2.jpg', time: '2 hours ago', message: 'Another community feed post.' },
+];
 
 const Home = () => {
-  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
-  const scheme = useColorScheme()
-  const theme = Colors[scheme] ?? Colors.light
+    const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
+    const scheme = useColorScheme();
+    const theme = Colors[scheme] ?? Colors.light;
+    const [loading, setLoading] = useState(true);
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
 
-      {/* Header with gradient background */}
-      <View style={[styles.header, { paddingTop: statusBarHeight }]}>
-        <Spacer height={20}></Spacer>
-        <View style={styles.headerContent}>
-          <View>
-            <ThemedText style={styles.logoText}>Team21</ThemedText>
-            <ThemedText style={styles.welcomeText}>Welcome, Arya</ThemedText>
-          </View>
-          <View style={styles.headerRight}>
-            <Image source={{ uri: profileImg }} style={styles.profileImg} />
-          </View>
-        </View>
-      </View>
+    const [featuredEvents, setFeaturedEvents] = useState([]);
+    const [upcomingEvents, setUpcomingEvents] = useState([]);
 
-      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-        
+    useEffect(() => {
+        fetchEvents();
+    }, []);
 
-        {/* Featured Events */}
-        <View style={styles.section}>
-          <Spacer height={20}></Spacer>
-          <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Featured Events</ThemedText>
-            <TouchableOpacity>
-              <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
-            </TouchableOpacity>
-          </View>
+    const fetchEvents = async () => {
+    try {
+        setLoading(true);
+        const res = await getEvents();
+        const events = res.data || [];
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {featuredEvents.map((event) => (
-              <TouchableOpacity
-                key={event.id}
-                style={styles.featuredCard}
-                onPress={() => router.push('/eventDetails')}
-              >
-                <Image source={{ uri: event.image }} style={styles.featuredImage} />
-                <View style={styles.featuredOverlay}>
-                  <View style={styles.dateTag}>
-                    <ThemedText style={styles.dateText}>{event.date}</ThemedText>
-                  </View>
-                  <View style={styles.featuredContent}>
-                    <ThemedText style={styles.featuredTitle}>{event.title}</ThemedText>
-                    <View style={styles.locationRow}>
-                      <Ionicons name="location-outline" size={16} color="white" />
-                      <ThemedText style={styles.featuredLocation}>{event.location}</ThemedText>
+        const featured = events.filter(event => event.featured !== null).map(event => ({
+            id: event.event_id,
+            title: event.event_name,
+            date: new Date(event.start_time).toDateString(),
+            location: event.venue,
+            image: defaultEventImg,
+        }));
+
+        const upcoming = events.filter(event => event.featured === null).map(event => ({
+            id: event.event_id,
+            title: event.event_name,
+            date: new Date(event.start_time).toDateString(),
+            time: new Date(event.start_time).toLocaleTimeString(),
+            location: event.venue,
+            image: defaultEventImg,
+        }));
+
+        setFeaturedEvents(featured);
+        setUpcomingEvents(upcoming);
+    } catch (error) {
+        console.error('Failed to fetch events:', error);
+    } finally {
+        setLoading(false);
+    }
+
+};
+
+
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+            <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
+            <View style={[styles.header, { paddingTop: statusBarHeight }]}>
+                <Spacer height={20}></Spacer>
+                <View style={styles.headerContent}>
+                    <View>
+                        <ThemedText style={styles.logoText}>Team21</ThemedText>
+                        <ThemedText style={styles.welcomeText}>Welcome, Arya</ThemedText>
                     </View>
-                    <TouchableOpacity
-                      style={styles.registerButton}
-                      onPress={() => router.push('/registerEvent')}
-                    >
-                      <ThemedText style={styles.registerButtonText}>Register</ThemedText>
-                    </TouchableOpacity>
-                  </View>
+                    <View style={styles.headerRight}>
+                        <Image source={{ uri: profileImg }} style={styles.profileImg} />
+                    </View>
                 </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Upcoming Events */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Upcoming Events</ThemedText>
-            <TouchableOpacity>
-              <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {upcomingEvents.map((event) => (
-              <TouchableOpacity
-                key={event.id}
-                style={[styles.eventCard, { backgroundColor: theme.cardBackground }]}
-                onPress={() => router.push('/eventDetails')}
-              >
-                <Image source={{ uri: event.image }} style={styles.eventImage} />
-                <View style={styles.eventContent}>
-                  <View style={styles.eventHeader}>
-                    <ThemedText style={[styles.eventTitle, { color: theme.title }]}>{event.title}</ThemedText>
-                    <TouchableOpacity>
-                      <Ionicons name="bookmark-outline" size={20} color={theme.text} />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.eventDetails}>
-                    <View style={styles.eventDetailRow}>
-                      <Ionicons name="calendar-outline" size={16} color={theme.text} />
-                      <ThemedText style={styles.eventDetailText}>{event.date}</ThemedText>
-                    </View>
-                    <View style={styles.eventDetailRow}>
-                      <Ionicons name="time-outline" size={16} color={theme.text} />
-                      <ThemedText style={styles.eventDetailText}>{event.time}</ThemedText>
-                    </View>
-                    <View style={styles.eventDetailRow}>
-                      <Ionicons name="location-outline" size={16} color={theme.text} />
-                      <ThemedText style={styles.eventDetailText}>{event.location}</ThemedText>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    style={[styles.eventRegisterButton, { backgroundColor: theme.primary ?? Colors.primary }]}
-                    onPress={() => router.push('/registerEvent')}
-                  >
-                    <ThemedText style={styles.eventRegisterText}>Register</ThemedText>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View style={styles.quickAccessSection}>
-          <ThemedText style={styles.quickAccessTitle}>Quick Access</ThemedText>
-          <View style={styles.quickAccessGrid}>
-            {quickAccess.map((item, idx) => (
-              <TouchableOpacity key={item.label} style={styles.quickAccessBtn} onPress={item.onPress}>
-                {item.icon}
-                <ThemedText style={styles.quickAccessLabel}>{item.label}</ThemedText>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Community Feed</ThemedText>
-            <TouchableOpacity>
-              <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
-            </TouchableOpacity>
-          </View>
-          {communityFeed.map(feed => (
-            <View key={feed.id} style={styles.feedCard}>
-              <View style={styles.feedCardHeader}>
-                <Image source={{ uri: feed.avatar }} style={styles.feedAvatar} />
-                <View style={{ flex: 1 }}>
-                  <ThemedText style={styles.feedName}>{feed.name}</ThemedText>
-                  <ThemedText style={styles.feedTime}>{feed.time}</ThemedText>
-                </View>
-              </View>
-              <ThemedText style={styles.feedMessage}>{feed.message}</ThemedText>
             </View>
-          ))}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  )
-}
 
-export default Home
+            <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+                <View style={styles.section}>
+                    <Spacer height={20}></Spacer>
+                    <View style={styles.sectionHeader}>
+                        <ThemedText style={styles.sectionTitle}>Featured Events</ThemedText>
+                        <TouchableOpacity>
+                            <ThemedText 
+                            onPress={()=>{router.push('/event')}}
+                            style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                    {!loading && featuredEvents.length === 0 && (
+    <View style={styles.eventsFallbackContainer}>
+        <ThemedText style={[styles.eventsFallbackText,{color: theme.text} ]}>
+            More events coming soon!
+        </ThemedText>
+    </View>
+)}
+                  {loading ? (
+                              <ThemedText>Loading Events...</ThemedText>
+                              ) : (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+                        {featuredEvents.map((event) => (
+                            <TouchableOpacity
+                                key={event.id}
+                                style={styles.featuredCard}
+                                onPress={() => router.push(`/eventDetails?event_id=${event.id}`)}
+                            >
+                                <Image source={{ uri: event.image }} style={styles.featuredImage} />
+                                <View style={styles.featuredOverlay}>
+                                    <View style={styles.dateTag}>
+                                        <ThemedText style={styles.dateText}>{event.date}</ThemedText>
+                                    </View>
+                                    <View style={styles.featuredContent}>
+                                        <ThemedText style={styles.featuredTitle}>{event.title}</ThemedText>
+                                        <View style={styles.locationRow}>
+                                            <Ionicons name="location-outline" size={16} color="white" />
+                                            <ThemedText style={styles.featuredLocation}>{event.location}</ThemedText>
+                                        </View>
+                                        <TouchableOpacity style={styles.registerButton} onPress={() => router.push('/registerEvent')}>
+                                            <ThemedText style={styles.registerButtonText}>Register</ThemedText>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                              )}
+                </View>
+
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <ThemedText style={styles.sectionTitle}>Upcoming Events</ThemedText>
+                        <TouchableOpacity>
+                            <ThemedText 
+                            onPress={()=>{router.push('/event')}}
+                            style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                    {!loading && upcomingEvents.length === 0 && (
+    <View style={styles.eventsFallbackContainer}>
+        <ThemedText style={[styles.eventsFallbackText,{color: theme.text} ]}>
+            More events coming soon!
+        </ThemedText>
+    </View>
+)}
+
+                  {loading ? (
+                          <ThemedText>Loading Events...</ThemedText>
+                      ) : (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+                        {upcomingEvents.map((event) => (
+                            <TouchableOpacity
+                                key={event.id}
+                                style={[styles.eventCard, { backgroundColor: theme.cardBackground }]}
+                                onPress={() => router.push(`/eventDetails?event_id=${event.id}`)}
+                            >
+                                <Image source={{ uri: event.image }} style={styles.eventImage} />
+                                <View style={styles.eventContent}>
+                                    <View style={styles.eventHeader}>
+                                        <ThemedText style={[styles.eventTitle, { color: theme.title }]}>{event.title}</ThemedText>
+                                        <TouchableOpacity>
+                                            <Ionicons name="bookmark-outline" size={20} color={theme.text} />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <View style={styles.eventDetails}>
+                                        <View style={styles.eventDetailRow}>
+                                            <Ionicons name="calendar-outline" size={16} color={theme.text} />
+                                            <ThemedText style={styles.eventDetailText}>{event.date}</ThemedText>
+                                        </View>
+                                        <View style={styles.eventDetailRow}>
+                                            <Ionicons name="time-outline" size={16} color={theme.text} />
+                                            <ThemedText style={styles.eventDetailText}>{event.time}</ThemedText>
+                                        </View>
+                                        <View style={styles.eventDetailRow}>
+                                            <Ionicons name="location-outline" size={16} color={theme.text} />
+                                            <ThemedText style={styles.eventDetailText}>{event.location}</ThemedText>
+                                        </View>
+                                    </View>
+
+                                    <TouchableOpacity
+                                        style={[styles.eventRegisterButton, { backgroundColor: theme.primary ?? Colors.primary }]}
+                                        onPress={() => router.push('/registerEvent')}
+                                    >
+                                        <ThemedText style={styles.eventRegisterText}>Register</ThemedText>
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                      )}
+                </View>
+
+                <View style={styles.quickAccessSection}>
+                    <ThemedText style={styles.quickAccessTitle}>Quick Access</ThemedText>
+                    <View style={styles.quickAccessGrid}>
+                        {quickAccess.map((item) => (
+                            <TouchableOpacity key={item.label} style={styles.quickAccessBtn} onPress={item.onPress}>
+                                {item.icon}
+                                <ThemedText style={styles.quickAccessLabel}>{item.label}</ThemedText>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <ThemedText style={styles.sectionTitle}>Community Feed</ThemedText>
+                        <TouchableOpacity >
+                            <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                    {communityFeed.map(feed => (
+                        <View key={feed.id} style={styles.feedCard}>
+                            <View style={styles.feedCardHeader}>
+                                <Image source={{ uri: feed.avatar }} style={styles.feedAvatar} />
+                                <View style={{ flex: 1 }}>
+                                    <ThemedText style={styles.feedName}>{feed.name}</ThemedText>
+                                    <ThemedText style={styles.feedTime}>{feed.time}</ThemedText>
+                                </View>
+                            </View>
+                            <ThemedText style={styles.feedMessage}>{feed.message}</ThemedText>
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    );
+};
+
+export default Home;
+
 
 const styles = StyleSheet.create({
   header: {
@@ -500,4 +505,15 @@ const styles = StyleSheet.create({
     color: '#222',
     marginTop: 2,
   },
+  eventsFallbackContainer:{ 
+    paddingVertical: 30, 
+    width: '100%', 
+    alignItems: 'center' 
+  },
+  eventsFallbackText : { 
+    fontSize: 16, 
+    opacity: 0.6 
+  }
+
+
 })

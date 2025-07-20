@@ -1,58 +1,76 @@
-import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native'
-import React from 'react'
-import { router } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { Colors } from '../constants/Colors'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useLocalSearchParams, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../constants/Colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getEventById } from './services/eventService';
 
-import ThemedView from '../components/ThemedView'
-import ThemedText from '../components/ThemedText'
-
-const eventData = {
-  title: 'City Basketball Tournament',
-  date: 'May 10, 2025',
-  time: '10:00 AM',
-  location: 'ABC Stadium, Tatguni, Agara, Bangalore Karnataka 560018',
-  price: '₹500',
-  image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
-  attendees: '20+ Going',
-  description: `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.`
-}
+import ThemedView from '../components/ThemedView';
+import ThemedText from '../components/ThemedText';
 
 const attendeeImages = [
   'https://randomuser.me/api/portraits/men/1.jpg',
   'https://randomuser.me/api/portraits/women/2.jpg',
   'https://randomuser.me/api/portraits/men/3.jpg'
-]
+];
 
 const EventDetails = () => {
-  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
-  const scheme = useColorScheme()
-  const insets = useSafeAreaInsets()
-  const theme = Colors[scheme] ?? Colors.light
+  const { event_id } = useLocalSearchParams();
+  const [eventData, setEventData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const insets = useSafeAreaInsets();
+  const scheme = useColorScheme();
+  const theme = Colors[scheme] ?? Colors.light;
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getEventById(event_id);
+        setEventData({
+          title: data.event_name,
+          date: new Date(data.start_time).toDateString(),
+          time: new Date(data.start_time).toLocaleTimeString(),
+          location: data.venue,
+          price: `₹${data.entry_fee}`,
+          description: data.rules || 'No description provided.',
+          image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
+          attendees: `${data.registered}+ Going`,
+        });
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [event_id]);
+
+  if (loading || !eventData) {
+    return (
+      <ThemedView safe style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.text} />
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView safe style={{ flex: 1, backgroundColor: theme.background }}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
       <ScrollView style={{ flex: 1 }}>
-        {/* Hero Image with Header */}
         <View style={styles.heroContainer}>
           <Image source={{ uri: eventData.image }} style={styles.heroImage} />
           <View style={[styles.heroOverlay, { paddingTop: statusBarHeight }]}>
             <View style={styles.heroHeader}>
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => router.back()}
-              >
+              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                 <Ionicons name="arrow-back" size={24} color="white" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.shareButton}>
                 <Ionicons name="share-outline" size={24} color="white" />
               </TouchableOpacity>
             </View>
-
-            {/* Attendees Info */}
             <View style={styles.attendeesContainer}>
               <View style={styles.attendeeImages}>
                 {attendeeImages.map((img, index) => (
@@ -71,7 +89,6 @@ const EventDetails = () => {
           </View>
         </View>
 
-        {/* Event Details */}
         <View style={[styles.detailsContainer, { backgroundColor: theme.cardBackground }]}>
           <ThemedText style={[styles.eventTitle, { color: theme.title }]}>{eventData.title}</ThemedText>
 
@@ -80,24 +97,20 @@ const EventDetails = () => {
               <Ionicons name="calendar-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.date}</ThemedText>
             </View>
-
             <View style={styles.infoRow}>
               <Ionicons name="time-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.time}</ThemedText>
             </View>
-
             <View style={styles.infoRow}>
               <Ionicons name="location-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.location}</ThemedText>
             </View>
-
             <View style={styles.infoRow}>
               <Ionicons name="card-outline" size={20} color={theme.text} />
               <ThemedText style={styles.infoText}>{eventData.price}</ThemedText>
             </View>
           </View>
 
-          {/* About Event */}
           <View style={styles.aboutSection}>
             <ThemedText style={[styles.sectionTitle, { color: theme.title }]}>About Event</ThemedText>
             <ThemedText style={styles.description}>{eventData.description}</ThemedText>
@@ -105,7 +118,6 @@ const EventDetails = () => {
         </View>
       </ScrollView>
 
-      {/* Register Button */}
       <View style={[
         styles.registerContainer,
         { backgroundColor: theme.cardBackground, paddingBottom: insets.bottom + 5 }
@@ -118,10 +130,11 @@ const EventDetails = () => {
         </TouchableOpacity>
       </View>
     </ThemedView>
-  )
-}
+  );
+};
 
-export default EventDetails
+export default EventDetails;
+
 
 const styles = StyleSheet.create({
   heroContainer: {

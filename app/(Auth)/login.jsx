@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, TextInput, Button, Text, StyleSheet, Pressable, TouchableWithoutFeedback, Keyboard,ActivityIndicator } from 'react-native';
 import axios from '../../lib/axios';
 import { router,Link } from 'expo-router';
 import ThemedView from '../../components/ThemedView'
@@ -8,27 +8,33 @@ import { Colors } from '../../constants/Colors';
 import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
 import ThemedTextInput from '../../components/ThemedTextInput';
+import ThemedLoader from '../../components/ThemedLoader';
 
-import { useUser } from '../hooks/useUser';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   
-  const { user, login } = useUser()
+  const { user, login } = useAuth()
 
 
   const handleLogin = async () => {
     try {
-      await login(email,password)
-      console.log("Attepmt to login",email,password)
-      setTimeout(() => {
-        router.replace('/home')
-      }, 1000);
+      console.log("Attepmt to login with data ",{email_id:email,password: password})
+      const resp = await login(email,password)
+      console.log("success:",resp.message)
+      router.replace('/home')
     } catch (error) {
-       setError(error.message)
+    console.log('Login error:', error);
+    if (error.response?.data?.message) {
+        setError(error.response.data.message);
+    } else {
+        setError(error.message || 'Login failed');
     }
+}
+
     
   };
 
@@ -69,13 +75,12 @@ export default function Register() {
 
         <Spacer />
         {error && <Text style={styles.error}>{error}</Text>}
+       
 
       <ThemedView style={styles.redirect}>
         <ThemedText style={{fontSize:20}}>Don't have an account? </ThemedText>
         <Link href="/register" style={[{color:Colors.primary},styles.link]}>Register</Link>
       </ThemedView>
-
-        <Link href="/home" style={[{color:Colors.primary},styles.link]}>Home</Link>
     </ThemedView>
 
     </TouchableWithoutFeedback>
