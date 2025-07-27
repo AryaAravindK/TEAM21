@@ -1,14 +1,16 @@
 import React,{ useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from "expo-router";
 import { verifyAccount } from '../services/authService';
+import { Colors } from '../../constants/Colors';
 
 export default function Verify() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const inputRefs = useRef([...Array(6)].map(() => React.createRef()));
 
   const params = useLocalSearchParams();
@@ -39,9 +41,13 @@ export default function Verify() {
     }
 
     try {
+      setLoading(true);
+      setError('');
       const resp = await verifyAccount({ email_id, verification_code });
+      setLoading(false);
       setShowSuccessModal(true);
     } catch (error) {
+      setLoading(false);
       if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else {
@@ -97,8 +103,12 @@ export default function Verify() {
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <TouchableOpacity style={styles.verifyButton} onPress={handleVerify}>
-        <Text style={styles.verifyText}>Verify</Text>
+      <TouchableOpacity style={styles.verifyButton} onPress={handleVerify} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator size='small' color='#ffffff'/>
+        ) : (
+          <Text style={styles.verifyText}>Verify</Text>
+        )}
       </TouchableOpacity>
 
       <View style={styles.resendSection}>
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1B8A9A',
+    color: Colors.primary,
     marginBottom: 16,
   },
   subtitle: {
@@ -173,7 +183,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: '#1B8A9A',
+    borderColor: Colors.primary,
     fontSize: 18,
     color: '#333',
     backgroundColor: '#F9F9F9',
@@ -185,7 +195,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   verifyButton: {
-    backgroundColor: '#1B8A9A',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -211,7 +221,7 @@ const styles = StyleSheet.create({
   },
   resendLink: {
     fontSize: 16,
-    color: '#1B8A9A',
+    color: Colors.primary,
     fontWeight: '600',
   },
   modalOverlay: {
@@ -232,7 +242,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1B8A9A',
+    color: Colors.primary,
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -244,7 +254,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   modalButton: {
-    backgroundColor: '#1B8A9A',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -252,7 +262,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalButtonSecondary: {
-    backgroundColor: '#1B8A9A',
+    backgroundColor: Colors.primary,
   },
   modalButtonText: {
     color: 'white',

@@ -18,10 +18,10 @@ import { useAuth } from '../hooks/useAuth';
 const defaultEventImg = 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800';
 
 const quickAccess = [
-    { label: 'My Certificates', icon: <MaterialCommunityIcons name="certificate" size={32} color="#2563eb" />, onPress: () => { }, },
-    { label: 'Saved Events', icon: <MaterialCommunityIcons name="bookmark" size={32} color="#2563eb" />, onPress: () => { }, },
-    { label: 'Event History', icon: <MaterialCommunityIcons name="notebook" size={32} color="#2563eb" />, onPress: () => { }, },
-    { label: 'Leaderboard', icon: <MaterialCommunityIcons name="trophy" size={32} color="#2563eb" />, onPress: () => { }, },
+    { label: 'My Certificates', icon: <MaterialCommunityIcons name="certificate" size={32} color="#02728e" />, onPress: () => { }, },
+    { label: 'Saved Events', icon: <MaterialCommunityIcons name="bookmark" size={32} color="#02728e" />, onPress: () => { }, },
+    { label: 'Event History', icon: <MaterialCommunityIcons name="notebook" size={32} color="#02728e" />, onPress: () => { }, },
+    { label: 'Leaderboard', icon: <MaterialCommunityIcons name="trophy" size={32} color="#02728e" />, onPress: () => { }, },
 ];
 
 const communityFeed = [
@@ -96,7 +96,7 @@ const Home = () => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
             <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
-            <View style={[styles.header, { paddingTop: statusBarHeight }]}>
+            <View style={[styles.header, { paddingTop: statusBarHeight}]}>
                 <Spacer height={20}></Spacer>
                 <View style={styles.headerContent}>
                     <View>
@@ -269,8 +269,10 @@ export default Home;
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: Colors.primary,
     paddingBottom: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15
   },
   headerContent: {
     flexDirection: 'row',
@@ -436,7 +438,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   quickAccessSection: {
-    backgroundColor: '#eaf3ff',
+    padding: 10,
     paddingHorizontal: 16,
     // paddingTop: 16,
     paddingBottom: 8,

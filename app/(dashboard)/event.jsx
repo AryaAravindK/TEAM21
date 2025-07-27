@@ -105,7 +105,7 @@ const fetchMyEvents = async () => {
         <TouchableOpacity
           style={[
             styles.tabButton,
-            activeTab === 'all' && { backgroundColor: theme.primary ?? Colors.primary },
+            activeTab === 'all' && { backgroundColor: theme.primary },
           ]}
           onPress={() => setActiveTab('all')}
         >
@@ -117,7 +117,7 @@ const fetchMyEvents = async () => {
         <TouchableOpacity
           style={[
             styles.tabButton,
-            activeTab === 'my' && { backgroundColor: theme.primary ?? Colors.primary },
+            activeTab === 'my' && { backgroundColor: theme.primary },
           ]}
           onPress={() => setActiveTab('my')}
         >
@@ -166,7 +166,7 @@ const fetchMyEvents = async () => {
                 </View>
             {activeTab === 'all' && (
                 <TouchableOpacity
-                  style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
+                  style={[styles.registerButton, { backgroundColor: theme.primary }]}
                   onPress={()=>{router.push(`/registerEvent?event_id=${event.id}`)}}
                 >
                   <ThemedText style={styles.registerButtonText}>Register</ThemedText>

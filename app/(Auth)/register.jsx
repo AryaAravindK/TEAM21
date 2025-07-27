@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { router, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedView from '../../components/ThemedView';
@@ -14,6 +14,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const { register } = useAuth();
 
@@ -30,9 +31,12 @@ export default function Register() {
     setError('');
 
     try {
+      setLoading(true);
       await register({ username, email_id: email, password });
+      setLoading(false);
       router.replace(`/verify?email_id=${encodeURIComponent(email)}`);
     } catch (error) {
+      setLoading(false);
       console.log('Register error ->', error);
 
       if (error.response?.data?.message) {
@@ -108,8 +112,12 @@ export default function Register() {
 
           <Spacer height={40} />
 
-          <TouchableOpacity style={styles.sendOtpButton} onPress={handleRegister}>
-            <Text style={styles.sendOtpText}>Send OTP</Text>
+          <TouchableOpacity style={styles.sendOtpButton} onPress={handleRegister} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator size='small' color='#ffffff'/>
+            ) : (
+              <Text style={styles.sendOtpText}>Send OTP</Text>
+            )}
           </TouchableOpacity>
 
           <Spacer height={20} />
@@ -140,7 +148,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: Colors.teal,
+    color: Colors.primary,
     marginBottom: 16,
     lineHeight: 40,
   },
@@ -169,7 +177,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   sendOtpButton: {
-    backgroundColor: Colors.teal,
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -191,7 +199,7 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontSize: 16,
-    color: Colors.teal,
+    color: Colors.primary,
     fontWeight: '600',
   },
 });

@@ -1,76 +1,11 @@
-import { StyleSheet, View, TouchableOpacity, ScrollView, Image, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native'
-import React from 'react'
+import { StyleSheet, View, TouchableOpacity, ScrollView, Image, SafeAreaView, StatusBar, Platform, useColorScheme, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Colors } from '../../constants/Colors'
+import { getAlerts } from '../services/alertService'
 
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
-
-const notifications = [
-  {
-    id: 1,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 2,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 3,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 4,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 5,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 6,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 7,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 8,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-  {
-    id: 9,
-    title: 'New Event Registration',
-    description: 'Successfully registered for city basketball tournamnet',
-    time: '10 mins ago',
-    read: false,
-  },
-]
 
 const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg'
 
@@ -79,6 +14,41 @@ const Alerts = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
   const scheme = useColorScheme();
   const theme = Colors[scheme] ?? Colors.light;
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAlerts();
+  }, []);
+
+  const fetchAlerts = async () => {
+    try {
+      setLoading(true);
+      const response = await getAlerts();
+      setNotifications(response.data || []);
+    } catch (error) {
+      console.error('Failed to fetch alerts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getAlertIcon = (type) => {
+    switch (type) {
+      case 'registration':
+        return require('../../assets/bell.png');
+      case 'invitation':
+        return require('../../assets/bell.png');
+      case 'reminder':
+        return require('../../assets/bell.png');
+      case 'achievement':
+        return require('../../assets/Trophy.png');
+      case 'update':
+        return require('../../assets/bell.png');
+      default:
+        return require('../../assets/bell.png');
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -95,47 +65,83 @@ const Alerts = () => {
       {/*------------------- Sub-header with back arrow and title -----------------------------*/}
       <View style={[styles.subHeader, { backgroundColor: theme.background, borderBottomColor: theme.cardBackground }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backArrowContainer}>
-          <ThemedText style={[styles.backArrow, { color: theme.primary ?? Colors.primary }]}> {'\u2190'} </ThemedText>
+          <ThemedText style={[styles.backArrow, { color: theme.primary }]}> {'\u2190'} </ThemedText>
         </TouchableOpacity>
         <ThemedText style={[styles.notificationsTitle, { color: theme.title }]}>Notifications</ThemedText>
       </View>
 
-      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-        {notifications.map((notif, idx) => (
-          <View
-            key={notif.id}
-            style={[
-              styles.notificationBox,
-              {
-                backgroundColor: theme.background,
-                borderBottomColor: theme.cardBackground,
-                borderTopWidth: idx === 0 ? 1 : 0,
-                borderTopColor: theme.cardBackground,
-              },
-            ]}
-          >
-
-            <View style={styles.iconContainer}>
-              <Image
-                source={require('../../assets/bell.png')}
-                style={[styles.bellIcon, { width: 28, height: 28 }]}
-                resizeMode="contain"
-              />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <ThemedText style={[styles.loadingText, { color: theme.text }]}>Loading notifications...</ThemedText>
+        </View>
+      ) : (
+        <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+          {notifications.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <ThemedText style={[styles.emptyText, { color: theme.text }]}>No notifications yet</ThemedText>
             </View>
+          ) : (
+            notifications.map((notif, idx) => (
+              <View
+                key={notif.id}
+                style={[
+                  styles.notificationBox,
+                  {
+                    backgroundColor: notif.read ? theme.background : theme.cardBackground,
+                    borderBottomColor: theme.secondary,
+                    borderTopWidth: idx === 0 ? 1 : 0,
+                    borderTopColor: theme.secondary,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 2,
+                  },
+                ]}
+              >
+                <View style={styles.iconContainer}>
+                  <Image
+                    source={getAlertIcon(notif.type)}
+                    style={[styles.bellIcon, { 
+                      width: 32, 
+                      height: 32,
+                      tintColor: notif.read ? theme.text : theme.primary
+                    }]}
+                    resizeMode="contain"
+                  />
+                </View>
 
-            <View style={styles.textContainer}>
-              <View style={styles.titleRow}>
-                <ThemedText style={[styles.title, { color: theme.title }]}>New Event Registration</ThemedText>
-                <TouchableOpacity>
-                  <ThemedText style={[styles.markAsRead, { color: theme.primary ?? Colors.primary }]}>Mark as read</ThemedText>
-                </TouchableOpacity>
+                <View style={styles.textContainer}>
+                  <ThemedText style={[
+                    styles.title, 
+                    { 
+                      color: notif.read ? theme.text : theme.title,
+                      fontWeight: notif.read ? 'normal' : 'bold'
+                    }
+                  ]}>
+                    {notif.title}
+                  </ThemedText>
+                  <ThemedText style={[
+                    styles.description, 
+                    { 
+                      color: theme.text,
+                      opacity: notif.read ? 0.7 : 1
+                    }
+                  ]}>
+                    {notif.description}
+                  </ThemedText>
+                  <ThemedText style={[styles.time, { color: '#888' }]}>{notif.time}</ThemedText>
+                </View>
+
+                {!notif.read && (
+                  <View style={[styles.unreadIndicator, { backgroundColor: theme.primary }]} />
+                )}
               </View>
-              <ThemedText style={[styles.description, { color: theme.text }]}>{notif.description}</ThemedText>
-              <ThemedText style={[styles.time, { color: '#888' }]}>{notif.time}</ThemedText>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+            ))
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   )
 }
@@ -150,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 8,
+    paddingBottom: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
   },
@@ -176,12 +182,12 @@ const styles = StyleSheet.create({
   subHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
   },
   backArrowContainer: {
-    marginRight: 8,
+    marginRight: 12,
     padding: 4,
   },
   backArrow: {
@@ -192,17 +198,41 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 18,
+    opacity: 0.6,
+  },
   notificationBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 18,
-    paddingHorizontal: 18,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    minHeight: 90,
+    minHeight: 100,
+    marginHorizontal: 8,
+    marginVertical: 4,
+    borderRadius: 12,
+    position: 'relative',
   },
   iconContainer: {
-    marginRight: 14,
-    marginTop: 2,
+    marginRight: 16,
+    marginTop: 4,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
   },
@@ -212,28 +242,24 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
   },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 2,
-  },
   title: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    marginRight: 8,
+    fontSize: 18,
+    marginBottom: 6,
   },
   description: {
-    fontSize: 14,
-    marginTop: 2,
+    fontSize: 15,
+    lineHeight: 20,
+    marginBottom: 8,
   },
   time: {
     fontSize: 13,
-    marginTop: 2,
   },
-  markAsRead: {
-    fontSize: 15,
-    marginLeft: 0,
-    marginTop: 2,
+  unreadIndicator: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
 })

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard,ActivityIndicator } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, ActivityIndicator } from 'react-native';
 import { router, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
@@ -10,19 +10,25 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const [loading , setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in all fields');
+      return;
+    }
+
     try {
       console.log("Attempt to login with data ", { email_id: email, password: password });
       setLoading(true);
+      setError(null);
       const resp = await login(email, password);
       console.log("success:", resp.message);
-      setLoading(false)
+      setLoading(false);
       router.replace('/home');
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.log('Login error:', error);
       if (error.response?.data?.message) {
         setError(error.response.data.message);
@@ -74,13 +80,13 @@ export default function Login() {
           {error && <Text style={styles.error}>{error}</Text>}
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-            {
-            loading ? <ActivityIndicator size='large' color='#ffffff'/>
-            :<Text style={styles.loginText}>Login</Text>
-            }
+            {loading ? (
+              <ActivityIndicator size='small' color='#ffffff'/>
+            ) : (
+              <Text style={styles.loginText}>Login</Text>
+            )}
           </TouchableOpacity>
 
-        {/* <Spacer height={200}/> */}
           <View style={styles.registerSection}>
             <Text style={styles.registerText}>Don't have an account? </Text>
             <Link href="/register" style={styles.registerLink}>Register</Link>
@@ -107,7 +113,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: Colors.teal,
+    color: Colors.primary,
     marginBottom: 16,
   },
   subtitle: {
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   loginButton: {
-    backgroundColor: Colors.teal,
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -160,11 +166,7 @@ registerSection: {
   },
   registerLink: {
     fontSize: 16,
-    color: Colors.teal,
+    color: Colors.primary,
     fontWeight: '600',
   },
-  btnLoading : {
-    color : Colors.teal,
-
-  }
 });

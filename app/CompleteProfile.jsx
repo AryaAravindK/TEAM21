@@ -13,9 +13,12 @@ export default function CompleteProfile() {
   const [interests, setInterests] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleComplete = async () => {
     try {
+      setLoading(true);
+      setError('');
       const res = await updateUser({
         firstname,
         lastname,
@@ -25,8 +28,10 @@ export default function CompleteProfile() {
         phone,
       });
       console.log(res.data);
+      setLoading(false);
       router.replace('/dashboard');
     } catch (err) {
+      setLoading(false);
       console.log(err);
       setError('Server error or invalid input');
     }
@@ -106,8 +111,12 @@ export default function CompleteProfile() {
 
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
-        <TouchableOpacity style={styles.finishButton} onPress={handleComplete}>
-          <Text style={styles.finishText}>Finish</Text>
+        <TouchableOpacity style={styles.finishButton} onPress={handleComplete} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size='small' color='#ffffff'/>
+          ) : (
+            <Text style={styles.finishText}>Finish</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -134,7 +143,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: Colors.teal,
+    color: Colors.primary,
     marginBottom: 16,
   },
   subtitle: {
@@ -167,7 +176,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   finishButton: {
-    backgroundColor: Colors.teal,
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
