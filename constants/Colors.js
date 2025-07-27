@@ -1,24 +1,24 @@
 export const Colors = {
-    primary:'#02728E',
-    teal: '#1B8A9A',
+    primary: '#02728E',
+    secondary: '#CEEBF2',
+    teal: '#02728E',
     warning: 'orange',
     registerPrimary: '#02728E',
     registerSecondary: '#CEEBF2',
     registerBackground: '#f2f2f2',
     
     light: {
-        background:'#EEF6FF',
-        cardBackground:'#FFFFFF',
-        text:'#565656ff',
-        title:'#151515',
-        iconColor: '#000000',
-        iconColorFocused : '#02728E',
+        background: '#CEEBF2',
+        cardBackground: '#FFFFFF',
+        text: '#565656ff',
+        title: '#02728E',
+        iconColor: '#02728E',
+        iconColorFocused: '#02728E',
+        primary: '#02728E',
+        secondary: '#CEEBF2',
 
-        inputBackground : '#FFFFFF',
-        inputColor : '#000000'
-
-
-
+        inputBackground: '#FFFFFF',
+        inputColor: '#000000'
     },
 
     // dark: {

@@ -269,7 +269,7 @@ export default Home;
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: Colors.primary,
     paddingBottom: 20,
   },
   headerContent: {

@@ -125,7 +125,7 @@ const EventDetails = () => {
         { backgroundColor: theme.cardBackground, paddingBottom: insets.bottom + 5 }
       ]}>
         <TouchableOpacity
-          style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
+          style={[styles.registerButton, { backgroundColor: theme.primary }]}
           onPress={() => router.push(`/registerEvent?event_id=${event_id}`)}
         >
           <ThemedText style={styles.registerButtonText}>Register Now</ThemedText>

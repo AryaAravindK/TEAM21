@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   selectedAvatar: {
-    borderColor: '#1B8A9A',
+    borderColor: Colors.primary,
   },
   avatarImage: {
     width: '100%',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#1B8A9A',
+    borderColor: Colors.primary,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -259,8 +259,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedInterest: {
-    backgroundColor: '#1B8A9A',
-    borderColor: '#1B8A9A',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   interestText: {
     fontSize: 14,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   confirmButton: {
-    backgroundColor: '#1B8A9A',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

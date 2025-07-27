@@ -1,63 +1,64 @@
-import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native'
-import React from 'react'
+import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '../../constants/Colors'
+import { getEventByUserId } from '../services/eventService'
 
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
 import { useAuth } from '../hooks/useAuth'
-
-
-const participationHistory = [
-  {
-    id: 1,
-    title: 'City Basketball Tournament',
-    date: 'April 28, 2025',
-    venue: 'Central Sports Arena',
-    result: 'Semi - finalist',
-    status: 'Completed'
-  },
-  {
-    id: 2,
-    title: 'City Basketball Tournament',
-    date: 'April 29, 2025',
-    venue: 'Central Sports Arena',
-    result: 'Semi - finalist',
-    status: 'Completed'
-  },
-  {
-    id: 3,
-    title: 'City Basketball Tournament',
-    date: 'April 29, 2025',
-    venue: 'Central Sports Arena',
-    result: 'Semi - finalist',
-    status: 'Completed'
-  }
-]
-
-
 
 const Profile = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
   const scheme = useColorScheme()
   const theme = Colors[scheme] ?? Colors.light
   const { userDetails, logout } = useAuth();
+  const [participationHistory, setParticipationHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const profileData = {
-  name: userDetails?.username ?? 'User',
-  age : userDetails?.age ? `, ${userDetails.age}` : '',
-  profileImage : userDetails?.profile_image ,
-  completionPercentage: '20% Complete',
-  participations: 0,
-  achievements: 0
-}
+    name: userDetails?.username ?? 'User',
+    age: userDetails?.age ? `, ${userDetails.age}` : '',
+    profileImage: userDetails?.profile_image,
+    completionPercentage: '20% Complete',
+    participations: participationHistory.length,
+    achievements: 0
+  }
 
-  function handleLogout(){
-  logout();
-  console.log("Logging out..")
-  router.replace('/login')
-}
+  useEffect(() => {
+    if (userDetails?.user_id) {
+      fetchParticipationHistory();
+    }
+  }, [userDetails?.user_id]);
+
+  const fetchParticipationHistory = async () => {
+    try {
+      setLoading(true);
+      const events = await getEventByUserId(userDetails.user_id);
+      
+      const formattedHistory = events.map((event) => ({
+        id: event.event_id,
+        title: event.event_name,
+        date: new Date(event.start_time).toDateString(),
+        venue: event.venue,
+        result: 'Participated', // This would come from actual participation data
+        status: new Date(event.start_time) < new Date() ? 'Completed' : 'Upcoming'
+      }));
+      
+      setParticipationHistory(formattedHistory);
+    } catch (error) {
+      console.error('Failed to fetch participation history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  function handleLogout() {
+    logout();
+    console.log("Logging out..")
+    router.replace('/login')
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -76,7 +77,7 @@ const Profile = () => {
         {/* Profile Section */}
         <View style={[styles.profileSection, { backgroundColor: theme.cardBackground }]}>
           <View style={styles.profileImageContainer}>
-            <Image source={userDetails?.details?.profile_image || require('../../assets/Avatar1.png') } style={styles.profileImage}/>
+            <Image source={userDetails?.details?.profile_image || require('../../assets/Avatar1.png')} style={styles.profileImage} />
             <View style={styles.completionBadge}>
               <ThemedText style={styles.completionText}>{profileData.completionPercentage}</ThemedText>
             </View>
@@ -84,7 +85,7 @@ const Profile = () => {
 
           <ThemedText style={[styles.profileName, { color: theme.title }]}>{profileData.name}</ThemedText>
 
-          <TouchableOpacity style={styles.editButton} onPress={()=>{ router.replace('/CompleteProfile')}}>
+          <TouchableOpacity style={styles.editButton} onPress={() => { router.replace('/CompleteProfile') }}>
             <Ionicons name="pencil-outline" size={16} color={theme.title} />
             <ThemedText style={[styles.editButtonText, { color: theme.title }]}>Edit Profile</ThemedText>
           </TouchableOpacity>
@@ -113,39 +114,59 @@ const Profile = () => {
         <View style={styles.historySection}>
           <View style={styles.historySectionHeader}>
             <ThemedText style={[styles.historySectionTitle, { color: theme.title }]}>Participation History</ThemedText>
-            <TouchableOpacity>
-              <ThemedText style={[styles.viewAll, { color: theme.primary ?? Colors.primary }]}>View all</ThemedText>
-            </TouchableOpacity>
+            {participationHistory.length > 3 && (
+              <TouchableOpacity>
+                <ThemedText style={[styles.viewAll, { color: theme.primary }]}>View all</ThemedText>
+              </TouchableOpacity>
+            )}
           </View>
 
-          {participationHistory.map((item) => (
-            <View key={item.id} style={[styles.historyItem, { backgroundColor: theme.cardBackground }]}>
-              <View style={styles.historyContent}>
-                <ThemedText style={[styles.historyTitle, { color: theme.title }]}>{item.title}</ThemedText>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={theme.primary} />
+              <ThemedText style={[styles.loadingText, { color: theme.text }]}>Loading history...</ThemedText>
+            </View>
+          ) : participationHistory.length === 0 ? (
+            <View style={styles.emptyHistoryContainer}>
+              <ThemedText style={[styles.emptyHistoryText, { color: theme.text }]}>
+                No participation history yet
+              </ThemedText>
+            </View>
+          ) : (
+            participationHistory.slice(0, 3).map((item) => (
+              <View key={item.id} style={[styles.historyItem, { backgroundColor: theme.cardBackground }]}>
+                <View style={styles.historyContent}>
+                  <ThemedText style={[styles.historyTitle, { color: theme.title }]}>{item.title}</ThemedText>
 
-                <View style={styles.historyDetails}>
-                  <View style={styles.historyDetailRow}>
-                    <Ionicons name="calendar-outline" size={16} color={theme.text} />
-                    <ThemedText style={styles.historyDetailText}>{item.date}</ThemedText>
-                  </View>
+                  <View style={styles.historyDetails}>
+                    <View style={styles.historyDetailRow}>
+                      <Ionicons name="calendar-outline" size={16} color={theme.text} />
+                      <ThemedText style={styles.historyDetailText}>{item.date}</ThemedText>
+                    </View>
 
-                  <View style={styles.historyDetailRow}>
-                    <Ionicons name="location-outline" size={16} color={theme.text} />
-                    <ThemedText style={styles.historyDetailText}>{item.venue}</ThemedText>
-                  </View>
+                    <View style={styles.historyDetailRow}>
+                      <Ionicons name="location-outline" size={16} color={theme.text} />
+                      <ThemedText style={styles.historyDetailText}>{item.venue}</ThemedText>
+                    </View>
 
-                  <View style={styles.historyDetailRow}>
-                    <Ionicons name="medal-outline" size={16} color={theme.text} />
-                    <ThemedText style={styles.historyDetailText}>{item.result}</ThemedText>
+                    <View style={styles.historyDetailRow}>
+                      <Ionicons name="medal-outline" size={16} color={theme.text} />
+                      <ThemedText style={styles.historyDetailText}>{item.result}</ThemedText>
+                    </View>
                   </View>
                 </View>
-              </View>
 
-              <View style={styles.statusContainer}>
-                <ThemedText style={[styles.statusText, { color: '#4CAF50' }]}>{item.status}</ThemedText>
+                <View style={styles.statusContainer}>
+                  <ThemedText style={[
+                    styles.statusText, 
+                    { color: item.status === 'Completed' ? '#4CAF50' : theme.primary }
+                  ]}>
+                    {item.status}
+                  </ThemedText>
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
 
         {/* Account Settings */}
@@ -218,7 +239,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     alignItems: 'center',
-    backgroundColor: '#2F4F9A',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
   },
 
@@ -317,6 +338,24 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginLeft: 12,
+    fontSize: 14,
+  },
+  emptyHistoryContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyHistoryText: {
+    fontSize: 16,
+    opacity: 0.6,
   },
   accountSettingsSection: {
     marginTop: 24,

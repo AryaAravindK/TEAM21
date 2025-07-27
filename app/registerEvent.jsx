@@ -413,7 +413,7 @@ const RegisterEvent = () => {
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirmButton} onPress={confirmJoinRequest}>
                 {apiCalling ? <ActivityIndicator color='#ffffff'/> :
-                <ThemedText style={styles.modalConfirmText}>Confirm</ThemedText>
+                  <ThemedText style={styles.modalConfirmText}>Confirm</ThemedText>
                 }
               </TouchableOpacity>
             </View>
