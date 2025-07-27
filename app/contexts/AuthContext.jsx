@@ -1,77 +1,114 @@
-import { createContext, useState, useEffect } from "react"
-import { registerAccount } from '../services/authService'
+import { createContext, useState, useEffect } from "react";
+import { registerAccount, loginAccount, getUserById } from '../services/authService';
+import api from '../../lib/axios';
+import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { loginAccount } from '../services/authService'
-import api from '../../lib/axios'
-import * as SecureStore from 'expo-secure-store'
-
-export const AuthContext = createContext()
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState({
     token: null,
     authenticated: false,
     authChecked: false,
+    details: null,
   });
 
   useEffect(() => {
-    const loadToken = async () => {
+    loadTokenAndUser();
+  }, []);
+
+  const loadTokenAndUser = async () => {
+    try {
       const token = await SecureStore.getItemAsync("JWT_TOKEN");
-      console.log("Stored:", token);
+      const storedUserId = await SecureStore.getItemAsync("USER_ID");
+
+      let userProfileImage = null;
+      const savedAvatar = await AsyncStorage.getItem('userAvatar');
+      if (savedAvatar) {
+        const avatar = JSON.parse(savedAvatar);
+        userProfileImage = avatar.source || null;
+      }
 
       if (token) {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        let userDetails = null;
+        if (storedUserId) {
+          const resp = await getUserById(storedUserId);
+          userDetails = resp?.data || null;
+          if (userDetails && userProfileImage) {
+            userDetails.profile_image = userProfileImage;
+          }
+        }
+
         setUser({
           token,
           authenticated: true,
           authChecked: true,
+          details: userDetails,
         });
       } else {
         setUser({
           token: null,
           authenticated: false,
           authChecked: true,
+          details: null,
         });
       }
-    };
-
-    loadToken();
-  }, []);
+    } catch (err) {
+      console.error("Error loading token or user:", err);
+      setUser({
+        token: null,
+        authenticated: false,
+        authChecked: true,
+        details: null,
+      });
+    }
+  };
 
   async function login(email, password) {
     try {
-      console.log("Logging in the user...");
       const resp = await loginAccount({ email_id: email, password });
+      const { token, user_id } = resp.data.data;
 
-      const token = resp.data.data.token;
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      await SecureStore.setItemAsync("JWT_TOKEN", token);
+      await SecureStore.setItemAsync("USER_ID", user_id.toString());
+
+      let userDetailsResp = await getUserById(user_id);
+      let userDetails = userDetailsResp?.data || null;
+
+      const savedAvatar = await AsyncStorage.getItem('userAvatar');
+      if (savedAvatar) {
+        const avatar = JSON.parse(savedAvatar);
+        userDetails.profile_image = avatar.source || null;
+      }
 
       setUser({
         token,
         authenticated: true,
         authChecked: true,
+        details: userDetails,
       });
 
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      await SecureStore.setItemAsync("JWT_TOKEN", token);
-
-      console.log("logged in:", resp.data.data);
       return resp.data;
     } catch (error) {
-      throw Error(error.message);
+      throw error;
     }
   }
 
   async function logout() {
     await SecureStore.deleteItemAsync("JWT_TOKEN");
+    await SecureStore.deleteItemAsync("USER_ID");
     api.defaults.headers.common["Authorization"] = "";
 
     setUser({
       token: null,
       authenticated: false,
       authChecked: true,
+      details: null,
     });
-
-    console.log("logged out");
   }
 
   async function register({ username, email_id, password }) {
@@ -83,14 +120,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function createUserProfile() {
-    
-  }
-
-  async function forgotPassword() {
-    
-  }
-
   return (
     <AuthContext.Provider
       value={{
@@ -98,8 +127,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         register,
-        createUserProfile,
-        forgotPassword,
+        userDetails: user.details,
       }}
     >
       {children}

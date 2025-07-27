@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import { router, Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import ThemedView from '../../components/ThemedView';
 import Spacer from '../../components/Spacer';
 import { Colors } from '../../constants/Colors';
 import ThemedText from '../../components/ThemedText';
-import ThemedButton from '../../components/ThemedButton';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
@@ -32,8 +32,6 @@ export default function Register() {
     try {
       await register({ username, email_id: email, password });
       router.replace(`/verify?email_id=${encodeURIComponent(email)}`);
-
-
     } catch (error) {
       console.log('Register error ->', error);
 
@@ -49,45 +47,79 @@ export default function Register() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView safe style={styles.container}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
+
         <Spacer height={20} />
 
-        <ThemedText style={styles.title} title>Create an account</ThemedText>
-        <ThemedText style={{ fontSize: 14 }}>Welcome! Please enter your details</ThemedText>
-        <Spacer height={20} />
+        {/* Title Section */}
+        <View style={styles.titleSection}>
+          <Text style={styles.title}>Let's sign{'\n'}you up!</Text>
+          <Text style={styles.subtitle}>
+            Get started with a few easy steps to access all the features. Your journey begins ere!
+          </Text>
+        </View>
 
-        <ThemedText title>Username</ThemedText>
-        <TextInput placeholder="Enter your username" value={username} onChangeText={setUsername} style={styles.input} />
-        <Spacer height={10} />
 
-        <ThemedText title>Email</ThemedText>
-        <TextInput placeholder="Enter your email" value={email} onChangeText={setEmail} style={styles.input} />
-        <Spacer height={10} />
+        {/* Form */}
+        <View style={styles.form}>
+          <TextInput
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            placeholderTextColor="#999"
+          />
 
-        <ThemedText title>Password</ThemedText>
-        <TextInput placeholder="Password" value={password} secureTextEntry onChangeText={setPassword} style={styles.input} />
-        <Spacer height={10} />
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
 
-        <ThemedText title>Confirm Password</ThemedText>
-        <TextInput placeholder="Re-enter Password" value={confirm} secureTextEntry onChangeText={setConfirm} style={styles.input} />
-        <ThemedText>Must be at least 8 characters</ThemedText>
-        <Spacer height={10} />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            secureTextEntry
+            onChangeText={setPassword}
+            style={styles.input}
+            placeholderTextColor="#999"
+          />
 
-        {error && <Text style={styles.error}>{error}</Text>}
-        <Spacer height={10} />
+          <TextInput
+            placeholder="Re-enter Password"
+            value={confirm}
+            secureTextEntry
+            onChangeText={setConfirm}
+            style={styles.input}
+            placeholderTextColor="#999"
+          />
 
-        <ThemedButton onPress={handleRegister}>
-          <Text style={{ color: '#ffffff', textAlign: 'center' }}>Register</Text>
-        </ThemedButton>
+          {error && <Text style={styles.error}>{error}</Text>}
 
-        <Spacer height={50} />
-        <ThemedView style={styles.redirect}>
-          <ThemedText style={{ fontSize: 20 }}>Already have an account </ThemedText>
-          <Link href="/login" style={[{ color: Colors.primary }, styles.link]}>Login</Link>
-        </ThemedView>
-          <Link href="/verify" style={[{ color: Colors.primary }, styles.link]}>verify</Link>
-      </ThemedView>
-      
+          <Spacer height={40} />
+
+          <TouchableOpacity style={styles.sendOtpButton} onPress={handleRegister}>
+            <Text style={styles.sendOtpText}>Send OTP</Text>
+          </TouchableOpacity>
+
+          <Spacer height={20} />
+
+          <View style={styles.loginSection}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <Link href="/login" style={styles.loginLink}>Login Now</Link>
+          </View>
+        </View>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -95,37 +127,71 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 10,
-    gap: 5,
-    fontFamily: 'arial',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+  },
+  header: {
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  titleSection: {
+    marginBottom: 20,
   },
   title: {
+    fontSize: 32,
     fontWeight: 'bold',
-    fontSize: 26,
+    color: Colors.teal,
+    marginBottom: 16,
+    lineHeight: 40,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 24,
+  },
+  form: {
+    flex: 1,
   },
   input: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderRadius: 10,
-    borderColor: '#888888',
-    padding: 10,
-  },
-  redirect: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-  },
-  link: {
-    fontSize: 20,
+    borderColor: '#E0E0E0',
   },
   error: {
-    color: 'red',
-    padding: 10,
-    backgroundColor: '#f5c1c8',
-    borderColor: Colors.warning,
-    borderWidth: 1,
-    borderRadius: 6,
-    marginHorizontal: 10,
+    color: '#FF3B30',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  sendOtpButton: {
+    backgroundColor: Colors.teal,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sendOtpText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  loginSection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loginText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  loginLink: {
+    fontSize: 16,
+    color: Colors.teal,
+    fontWeight: '600',
   },
 });

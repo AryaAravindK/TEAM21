@@ -1,37 +1,47 @@
-import { useState } from 'react';
-import { View, TextInput, Text, StyleSheet } from 'react-native';
-import axios from '../../lib/axios';
-import { router,Link } from 'expo-router';
-import ThemedView from '../../components/ThemedView';
-import Spacer from '../../components/Spacer';
-import ThemedText from '../../components/ThemedText';
-import ThemedButton from '../../components/ThemedButton';
+import React,{ useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from "expo-router";
-
-import { verifyAccount } from '../services/authService'
-import Colors from '../../constants/Colors'
+import { verifyAccount } from '../services/authService';
 
 export default function Verify() {
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const inputRefs = useRef([...Array(6)].map(() => React.createRef()));
+
   const params = useLocalSearchParams();
-  const [ login ] = useAuth();
-
-
-  console.log('Local search params:', params);
   const email_id = params.email_id;
 
+  const handleOtpChange = (value, index) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1].current.focus();
+    }
+  };
+
+  const handleKeyPress = ({ nativeEvent }, index) => {
+    if (nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1].current.focus();
+    }
+  };
+
   const handleVerify = async () => {
+    const verification_code = otp.join('');
+    if (verification_code.length !== 6) {
+      setError('Please enter complete 6-digit OTP');
+      return;
+    }
+
     try {
-      const verification_code = otp
-      console.log("verification body:",{email_id, verification_code})
-      const resp =await verifyAccount({email_id, verification_code})
-      console.log(resp.data)
-
-      router.replace('/login')
+      const resp = await verifyAccount({ email_id, verification_code });
+      setShowSuccessModal(true);
     } catch (error) {
-      console.log('verify error ->', error.response.data.message);
-
       if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else {
@@ -40,30 +50,213 @@ export default function Verify() {
     }
   };
 
+  const handleCompleteProfile = () => {
+    setShowSuccessModal(false);
+    router.replace('/basicProfileCompletion');
+  };
+
+  const handleGoToHome = () => {
+    setShowSuccessModal(false);
+    router.replace('/login');
+  };
+
   return (
-    <ThemedView style={styles.container}>
-      <Spacer height={40} />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color="#333" />
+        </TouchableOpacity>
+      </View>
 
-      <ThemedText style={styles.title} title>Email Verification</ThemedText>
-      <ThemedText style={{ fontSize: 14 }}>Please enter the OTP sent to your email</ThemedText>
-      <Spacer height={20} />
+      <View style={styles.titleSection}>
+        <Text style={styles.title}>OTP Verification</Text>
+        <Text style={styles.subtitle}>
+          Enter the verification code we just sent on your email.
+        </Text>
+      </View>
 
-      <ThemedText title>OTP Code</ThemedText>
-      <TextInput placeholder="Enter OTP" value={otp} onChangeText={setOtp} style={styles.input} />
-      <Spacer height={10} />
+      <View style={styles.otpContainer}>
+        {otp.map((digit, index) => (
+          <TextInput
+            key={index}
+            ref={inputRefs.current[index]}
+            value={digit}
+            onChangeText={(value) => handleOtpChange(value, index)}
+            onKeyPress={(e) => handleKeyPress(e, index)}
+            keyboardType="number-pad"
+            maxLength={1}
+            style={styles.otpBox}
+            textAlign="center"
+            autoFocus={index === 0}
+          />
+        ))}
+      </View>
 
-      {error ? <ThemedText style={{ color: 'red' }}>{error}</ThemedText> : null}
-      <Spacer height={10} />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <ThemedButton onPress={handleVerify}><Text style={{ color: '#ffffff', textAlign: 'center' }}>Verify</Text></ThemedButton>
-      <Spacer height={40} />
-      <Link href="/CompleteProfile" style={[{ color: '#2F4F9A' }]}>completeProfile</Link>
-    </ThemedView>
+      <TouchableOpacity style={styles.verifyButton} onPress={handleVerify}>
+        <Text style={styles.verifyText}>Verify</Text>
+      </TouchableOpacity>
+
+      <View style={styles.resendSection}>
+        <Text style={styles.resendText}>Didn't receive code? </Text>
+        <TouchableOpacity onPress={() => console.log('Resend OTP')}>
+          <Text style={styles.resendLink}>Resend</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Your Account Activated!</Text>
+            <Text style={styles.modalSubtitle}>
+              Congratulations! Your account is now active and ready to explore.
+            </Text>
+
+            <TouchableOpacity style={styles.modalButton} onPress={handleCompleteProfile}>
+              <Text style={styles.modalButtonText}>Complete Your Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.modalButton, styles.modalButtonSecondary]} onPress={handleGoToHome}>
+              <Text style={styles.modalButtonText}>Go To Home</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 10 },
-  title: { fontWeight: 'bold', fontSize: 26 },
-  input: { borderWidth: 1, borderRadius: 10, borderColor: '#888888', padding: 10 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+  },
+  header: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+  },
+  titleSection: {
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1B8A9A',
+    marginBottom: 16,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 40,
+  },
+  otpBox: {
+    width: 45,
+    height: 50,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#1B8A9A',
+    fontSize: 18,
+    color: '#333',
+    backgroundColor: '#F9F9F9',
+  },
+  error: {
+    color: '#FF3B30',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  verifyButton: {
+    backgroundColor: '#1B8A9A',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  verifyText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  resendSection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
+  },
+  resendText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  resendLink: {
+    fontSize: 16,
+    color: '#1B8A9A',
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 350,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1B8A9A',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 24,
+  },
+  modalButton: {
+    backgroundColor: '#1B8A9A',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 12,
+  },
+  modalButtonSecondary: {
+    backgroundColor: '#1B8A9A',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });

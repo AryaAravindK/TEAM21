@@ -32,3 +32,14 @@ export const updateUser = async ({ firstname, lastname, gender, age, interests, 
         throw error
     }
 }
+
+export const getUserById = async (user_id) => {
+    try {
+        const response = await api.get(`/user/get-user/${user_id}`);
+        console.log("get user:",response)
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch user by ID:', error);
+        throw error;
+    }
+};

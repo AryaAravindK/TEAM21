@@ -10,8 +10,11 @@ import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
 import Spacer from '../../components/Spacer';
 import { getEvents } from '../services/eventService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const profileImg = 'https://randomuser.me/api/portraits/men/1.jpg';
+import { useAuth } from '../hooks/useAuth';  
+
+
 const defaultEventImg = 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800';
 
 const quickAccess = [
@@ -33,12 +36,28 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
 
 
+    const { userDetails } = useAuth();
+
+
     const [featuredEvents, setFeaturedEvents] = useState([]);
     const [upcomingEvents, setUpcomingEvents] = useState([]);
 
     useEffect(() => {
         fetchEvents();
+        loadUserProfile();
     }, []);
+
+    const loadUserProfile = async () => {
+        try {
+            const savedAvatar = await AsyncStorage.getItem('userAvatar');
+            if (savedAvatar) {
+                const avatar = JSON.parse(savedAvatar);
+                //this needs to be implemented later
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
+    };
 
     const fetchEvents = async () => {
     try {
@@ -82,10 +101,11 @@ const Home = () => {
                 <View style={styles.headerContent}>
                     <View>
                         <ThemedText style={styles.logoText}>Team21</ThemedText>
-                        <ThemedText style={styles.welcomeText}>Welcome, Arya</ThemedText>
+                        <ThemedText style={styles.welcomeText}>Welcome, {userDetails?.username || 'User'}</ThemedText>
                     </View>
                     <View style={styles.headerRight}>
-                        <Image source={{ uri: profileImg }} style={styles.profileImg} />
+                        <Image source={userDetails?.details?.profile_image || require('../../assets/Avatar1.png') } />
+
                     </View>
                 </View>
             </View>
@@ -129,7 +149,10 @@ const Home = () => {
                                             <Ionicons name="location-outline" size={16} color="white" />
                                             <ThemedText style={styles.featuredLocation}>{event.location}</ThemedText>
                                         </View>
-                                        <TouchableOpacity style={styles.registerButton} onPress={() => router.push('/registerEvent')}>
+                                        <TouchableOpacity 
+                                          style={styles.registerButton} 
+                                          onPress={()=>{router.push(`/registerEvent?event_id=${event.id}`)}}
+                                        >
                                             <ThemedText style={styles.registerButtonText}>Register</ThemedText>
                                         </TouchableOpacity>
                                     </View>
@@ -193,7 +216,7 @@ const Home = () => {
 
                                     <TouchableOpacity
                                         style={[styles.eventRegisterButton, { backgroundColor: theme.primary ?? Colors.primary }]}
-                                        onPress={() => router.push('/registerEvent')}
+                                        onPress={()=>{router.push(`/registerEvent?event_id=${event.id}`)}}
                                     >
                                         <ThemedText style={styles.eventRegisterText}>Register</ThemedText>
                                     </TouchableOpacity>

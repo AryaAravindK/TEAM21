@@ -14,14 +14,19 @@ import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
-import { getEvents } from '../services/eventService'; // ✅ Your existing service
+import { getEvents } from '../services/eventService'; 
 import ThemedText from '../../components/ThemedText';
+import { getEventByUserId } from '../services/eventService'; 
+
+
+import { useAuth } from '../hooks/useAuth';  
 
 const Event = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [allEvents, setAllEvents] = useState([]);
-  const [myEvents, setMyEvents] = useState([]); // placeholder for future
+  const [myEvents, setMyEvents] = useState([]); 
   const [loading, setLoading] = useState(false);
+  const { userDetails }  = useAuth();
 
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
   const scheme = useColorScheme();
@@ -29,8 +34,10 @@ const Event = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+    fetchMyEvents();
+  }, [userDetails?.user_id]);
 
+  
   const fetchEvents = async () => {
     try {
       setLoading(true);
@@ -49,12 +56,36 @@ const Event = () => {
       }));
 
       setAllEvents(formattedEvents);
+      
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
+
+const fetchMyEvents = async () => {
+  try {
+    if (!userDetails?.user_id) return;
+
+    const apiData = await getEventByUserId(userDetails.user_id); 
+
+    const formattedEvents = apiData.map((event) => ({
+      id: event.event_id,
+      title: event.event_name,
+      date: new Date(event.start_time).toDateString(),
+      time: new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      location: event.venue,
+      image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
+      registered: event.registered,
+      max_registration: event.participant_limit
+    }));
+
+    setMyEvents(formattedEvents);
+  } catch (error) {
+    console.error('Failed to fetch my events:', error);
+  }
+};
 
   const eventsToShow = activeTab === 'all' ? allEvents : myEvents;
 
@@ -108,7 +139,7 @@ const Event = () => {
             <TouchableOpacity
               key={event.id}
               style={[styles.eventCard, { backgroundColor: theme.cardBackground }]}
-              onPress={() => router.push(`/eventDetails?event_id=${event.id}`)}
+              onPress={() => router.push(`/eventDetails?event_id=${event.id}&isMyEvent=${activeTab === 'my'}`)}
             >
               <Image source={{ uri: event.image }} style={styles.eventImage} />
               <View style={styles.eventContent}>
@@ -133,12 +164,14 @@ const Event = () => {
                     <ThemedText style={styles.eventDetailText}>{event.location}</ThemedText>
                   </View>
                 </View>
-
+            {activeTab === 'all' && (
                 <TouchableOpacity
                   style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
+                  onPress={()=>{router.push(`/registerEvent?event_id=${event.id}`)}}
                 >
                   <ThemedText style={styles.registerButtonText}>Register</ThemedText>
                 </TouchableOpacity>
+            )}
               </View>
             </TouchableOpacity>
           ))

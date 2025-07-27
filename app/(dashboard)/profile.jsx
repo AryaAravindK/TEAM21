@@ -8,13 +8,6 @@ import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
 import { useAuth } from '../hooks/useAuth'
 
-const profileData = {
-  name: 'Arya Khaded, 21',
-  profileImage: 'https://randomuser.me/api/portraits/men/1.jpg',
-  completionPercentage: '20% Complete',
-  participations: 12,
-  achievements: 8
-}
 
 const participationHistory = [
   {
@@ -49,7 +42,16 @@ const Profile = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44
   const scheme = useColorScheme()
   const theme = Colors[scheme] ?? Colors.light
-  const { logout } = useAuth();
+  const { userDetails, logout } = useAuth();
+
+  const profileData = {
+  name: userDetails?.username ?? 'User',
+  age : userDetails?.age ? `, ${userDetails.age}` : '',
+  profileImage : userDetails?.profile_image ,
+  completionPercentage: '20% Complete',
+  participations: 0,
+  achievements: 0
+}
 
   function handleLogout(){
   logout();
@@ -74,7 +76,7 @@ const Profile = () => {
         {/* Profile Section */}
         <View style={[styles.profileSection, { backgroundColor: theme.cardBackground }]}>
           <View style={styles.profileImageContainer}>
-            <Image source={{ uri: profileData.profileImage }} style={styles.profileImage} />
+            <Image source={userDetails?.details?.profile_image || require('../../assets/Avatar1.png') } style={styles.profileImage}/>
             <View style={styles.completionBadge}>
               <ThemedText style={styles.completionText}>{profileData.completionPercentage}</ThemedText>
             </View>
@@ -82,7 +84,7 @@ const Profile = () => {
 
           <ThemedText style={[styles.profileName, { color: theme.title }]}>{profileData.name}</ThemedText>
 
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={()=>{ router.replace('/CompleteProfile')}}>
             <Ionicons name="pencil-outline" size={16} color={theme.title} />
             <ThemedText style={[styles.editButtonText, { color: theme.title }]}>Edit Profile</ThemedText>
           </TouchableOpacity>

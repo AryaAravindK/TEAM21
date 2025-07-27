@@ -16,13 +16,15 @@ const attendeeImages = [
 ];
 
 const EventDetails = () => {
-  const { event_id } = useLocalSearchParams();
+  const { event_id, isMyEvent } = useLocalSearchParams();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
   const theme = Colors[scheme] ?? Colors.light;
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
+  
+  const isMyOwnEvent = isMyEvent === 'true';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,18 +119,18 @@ const EventDetails = () => {
           </View>
         </View>
       </ScrollView>
-
+{ !isMyOwnEvent  && (
       <View style={[
         styles.registerContainer,
         { backgroundColor: theme.cardBackground, paddingBottom: insets.bottom + 5 }
       ]}>
         <TouchableOpacity
           style={[styles.registerButton, { backgroundColor: theme.primary ?? Colors.primary }]}
-          onPress={() => router.push('/registerEvent')}
+          onPress={() => router.push(`/registerEvent?event_id=${event_id}`)}
         >
           <ThemedText style={styles.registerButtonText}>Register Now</ThemedText>
         </TouchableOpacity>
-      </View>
+      </View>)}
     </ThemedView>
   );
 };

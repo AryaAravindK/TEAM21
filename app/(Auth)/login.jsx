@@ -1,127 +1,170 @@
 import { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Pressable, TouchableWithoutFeedback, Keyboard,ActivityIndicator } from 'react-native';
-import axios from '../../lib/axios';
-import { router,Link } from 'expo-router';
-import ThemedView from '../../components/ThemedView'
-import Spacer from '../../components/Spacer';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard,ActivityIndicator } from 'react-native';
+import { router, Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
-import ThemedText from '../../components/ThemedText';
-import ThemedButton from '../../components/ThemedButton';
-import ThemedTextInput from '../../components/ThemedTextInput';
-import ThemedLoader from '../../components/ThemedLoader';
-
 import { useAuth } from '../hooks/useAuth';
+import Spacer from '../../components/Spacer';
 
-export default function Register() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  
-  const { user, login } = useAuth()
-
+  const [loading , setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     try {
-      console.log("Attepmt to login with data ",{email_id:email,password: password})
-      const resp = await login(email,password)
-      console.log("success:",resp.message)
-      router.replace('/home')
+      console.log("Attempt to login with data ", { email_id: email, password: password });
+      setLoading(true);
+      const resp = await login(email, password);
+      console.log("success:", resp.message);
+      setLoading(false)
+      router.replace('/home');
     } catch (error) {
-    console.log('Login error:', error);
-    if (error.response?.data?.message) {
+      setLoading(false)
+      console.log('Login error:', error);
+      if (error.response?.data?.message) {
         setError(error.response.data.message);
-    } else {
+      } else {
         setError(error.message || 'Login failed');
+      }
     }
-}
-
-    
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
 
-    
-    <ThemedView safe style={styles.container}>
-      <Spacer height={20}></Spacer>
+        {/* Title Section */}
+        <View style={styles.titleSection}>
+          <Text style={styles.title}>Login</Text>
+          <Text style={styles.subtitle}>
+            Welcome Back!{'\n'}please enter your details
+          </Text>
+        </View>
 
-      <ThemedText style={styles.title} title>Login</ThemedText>
-      <ThemedText style={{fontSize:14}}>Welcome back! please enter your details</ThemedText>
-      <Spacer height={20}></Spacer>
+        {/* Form */}
+        <View style={styles.form}>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
 
-      <ThemedText title>Email</ThemedText>
-      <ThemedTextInput 
-        placeholder="Enter you email" 
-        value={email} 
-        keyboardType='email-address'
-        onChangeText={setEmail} 
-        />
-      <Spacer height={10}/>
+          <TextInput
+            placeholder="Password"
+            value={password}
+            secureTextEntry
+            onChangeText={setPassword}
+            style={styles.input}
+            placeholderTextColor="#999"
+          />
 
-      <ThemedText title>Password</ThemedText>
-      <ThemedTextInput 
-        placeholder="Password" 
-        value={password} 
-        secureTextEntry 
-        onChangeText={setPassword}  
-        />
-      <Spacer height={10}/>
-      
-      {error ? <ThemedText style={{ color: 'red' }}>{error}</ThemedText> : null}
-      <Spacer height={10}/>
+          {error && <Text style={styles.error}>{error}</Text>}
 
-      <ThemedButton onPress = {handleLogin}><Text style={{color:'#ffffff',textAlign:'center'}}>Login</Text></ThemedButton>
-      <Spacer height={50}/>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+            {
+            loading ? <ActivityIndicator size='large' color='#ffffff'/>
+            :<Text style={styles.loginText}>Login</Text>
+            }
+          </TouchableOpacity>
 
-        <Spacer />
-        {error && <Text style={styles.error}>{error}</Text>}
-       
-
-      <ThemedView style={styles.redirect}>
-        <ThemedText style={{fontSize:20}}>Don't have an account? </ThemedText>
-        <Link href="/register" style={[{color:Colors.primary},styles.link]}>Register</Link>
-      </ThemedView>
-    </ThemedView>
-
+        {/* <Spacer height={200}/> */}
+          <View style={styles.registerSection}>
+            <Text style={styles.registerText}>Don't have an account? </Text>
+            <Link href="/register" style={styles.registerLink}>Register</Link>
+          </View>
+        </View>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    padding: 10,
-    gap:5,
-    fontFamily:'arial',
-    },
-  title:{
-    fontWeight:'bold',
-    fontSize:26,
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
   },
-  input: { 
-    borderWidth: 1, 
-    borderRadius: 10,
-    borderColor:'#888888',
-    padding: 10
+  header: {
+    paddingTop: 20,
+    paddingBottom: 20,
   },
-  redirect:{
-    flex:1,
-    flexDirection:'row',
-    justifyContent:'center',
-    alignItems:'stretch',
+  titleSection: {
+    marginBottom: 40,
   },
-  link:{
-    fontSize:20,
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.teal,
+    marginBottom: 16,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 24,
+  },
+  form: {
+    flex: 1,
+  },
+  input: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   error: {
-    color: Colors.warning,
-    padding: 10,
-    backgroundColor: '#f5c1c8',
-    borderColor: Colors.warning,
-    borderWidth: 1,
-    borderRadius: 6,
-    marginHorizontal: 10,
-  }
+    color: '#FF3B30',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  loginButton: {
+    backgroundColor: Colors.teal,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 40,
+  },
+  loginText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+registerSection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 200,
+},
 
+  registerText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  registerLink: {
+    fontSize: 16,
+    color: Colors.teal,
+    fontWeight: '600',
+  },
+  btnLoading : {
+    color : Colors.teal,
+
+  }
 });
