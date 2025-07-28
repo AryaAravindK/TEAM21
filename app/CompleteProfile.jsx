@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, ScrollView,ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -29,7 +29,7 @@ export default function CompleteProfile() {
       });
       console.log(res.data);
       setLoading(false);
-      router.replace('/dashboard');
+      router.replace('/home');
     } catch (err) {
       setLoading(false);
       console.log(err);
@@ -37,7 +37,7 @@ export default function CompleteProfile() {
     }
   };
 
-  return (
+  return (  
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>

@@ -26,7 +26,7 @@ export const verifyAccount = async ({ email_id, verification_code}) => {
 }
 export const updateUser = async ({ firstname, lastname, gender, age, interests, phone}) => {
     try {
-    const resp = await api.post('/auth/verify-account',{firstname, lastname, gender, age, interests, phone})
+    const resp = await api.post('/user/update-user',{firstname, lastname, gender, age, interests, phone})
     return resp
 } catch (error) {
         throw error

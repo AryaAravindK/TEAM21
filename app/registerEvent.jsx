@@ -26,6 +26,7 @@ import Spacer from '../components/Spacer'
 const RegisterEvent = () => {
   const { event_id } = useLocalSearchParams();
   const [eventData, setEventData] = useState(null);
+  const [myTeam, setMyTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiCalling, setApiCalling] = useState(false)
   const [activeTab, setActiveTab] = useState(null); 
@@ -57,6 +58,11 @@ const RegisterEvent = () => {
         fees: `₹${data.entry_fee}`,
         is_participant: data.is_participant
       });
+      
+      // Set team data if user is a participant
+      if (data.is_participant && data.team) {
+        setMyTeam(data.team);
+      }
     } catch (error) {
       console.error('Error fetching event data:', error);
     } finally {
@@ -220,152 +226,203 @@ const RegisterEvent = () => {
           </View>
           </LinearGradient>
 
-        {/* Tab Buttons */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              styles.joinTabButton,
-              activeTab === 'join' && styles.activeJoinTab
-            ]}
-            onPress={() => setActiveTab('join')}
-          >
-            <Ionicons 
-              name="people" 
-              size={20} 
-              color={activeTab === 'join' ? Colors.registerBackground : Colors.registerPrimary} 
-            />
-            <ThemedText style={[
-              styles.tabText,
-              { color: activeTab === 'join' ? Colors.registerBackground : Colors.registerPrimary }
-            ]}>
-              Join a Team
-            </ThemedText>
-          </TouchableOpacity>
+        {/* Conditional rendering based on participation status */}
+        {!eventData.is_participant ? (
+          <>
+            {/* Tab Buttons */}
+            <View style={styles.tabContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  styles.joinTabButton,
+                  activeTab === 'join' && styles.activeJoinTab
+                ]}
+                onPress={() => setActiveTab('join')}
+              >
+                <Ionicons 
+                  name="people" 
+                  size={20} 
+                  color={activeTab === 'join' ? Colors.registerBackground : Colors.registerPrimary} 
+                />
+                <ThemedText style={[
+                  styles.tabText,
+                  { color: activeTab === 'join' ? Colors.registerBackground : Colors.registerPrimary }
+                ]}>
+                  Join a Team
+                </ThemedText>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              styles.createTabButton,
-              activeTab === 'create' && styles.activeCreateTab
-            ]}
-            onPress={() => setActiveTab('create')}
-          >
-            <Ionicons 
-              name="add-circle" 
-              size={20} 
-              color={activeTab === 'create' ? Colors.registerBackground : Colors.registerPrimary} 
-            />
-            <ThemedText style={[
-              styles.tabText,
-              { color: activeTab === 'create' ? Colors.registerBackground : Colors.registerPrimary }
-            ]}>
-              Create a Team
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        {/* <Spacer/> */}
-        
-        {/* Content based on active tab */}
-        {activeTab === 'create' && (
-          <View style={styles.tabContent}>
-            <View style={styles.inputSection}>
-              <ThemedText style={styles.inputLabel}>Team Name</ThemedText>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter team name"
-                placeholderTextColor="#999"
-                value={teamName}
-                onChangeText={setTeamName}
-              />
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  styles.createTabButton,
+                  activeTab === 'create' && styles.activeCreateTab
+                ]}
+                onPress={() => setActiveTab('create')}
+              >
+                <Ionicons 
+                  name="add-circle" 
+                  size={20} 
+                  color={activeTab === 'create' ? Colors.registerBackground : Colors.registerPrimary} 
+                />
+                <ThemedText style={[
+                  styles.tabText,
+                  { color: activeTab === 'create' ? Colors.registerBackground : Colors.registerPrimary }
+                ]}>
+                  Create a Team
+                </ThemedText>
+              </TouchableOpacity>
             </View>
-
-            <View style={styles.inputSection} >
-              <ThemedText style={styles.inputLabel}>Search Team members</ThemedText>
-              <SearchBar
-                placeholder="Enter username"
-                onRecommendation={handleUserRecommendation}
-                onSelect={handleAddTeamMember}
-                renderItem={renderUserItem}
-              />
-            </View>
-
-            {teamMembers.length > 0 && (
-              <View style={styles.teamSection}>
-                <ThemedText style={styles.sectionTitle}>Your Team</ThemedText>
-                {teamMembers.map((member) => (
-                  <View key={member.user_id} style={styles.teamMemberItem}>
-                    <Image 
-                      source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
-                      style={styles.memberAvatar} 
-                    />
-                    <ThemedText style={styles.memberName}>{member.username}</ThemedText>
-                    <View style={styles.memberStatus}>
-                      <ThemedText style={styles.statusText}>
-                        {member.status === 'pending' ? 'Pending' : 'Verified'}
-                      </ThemedText>
+          </>
+        ) : (
+          <View style={styles.myTeamContainer}>
+            <ThemedText style={styles.myTeamLabel}>Your Team</ThemedText>
+            {myTeam && (
+              <>
+                <ThemedText style={styles.myTeamName}>{myTeam.team_name}</ThemedText>
+                
+                <View style={styles.teamMembersList}>
+                  {myTeam.members.map((member) => (
+                    <View key={member.team_member_id} style={styles.myTeamMemberItem}>
+                      <Image 
+                        source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
+                        style={styles.myTeamMemberAvatar} 
+                      />
+                      <ThemedText style={styles.myTeamMemberName}>{member.team_member_name}</ThemedText>
+                      <View style={[
+                        styles.myTeamMemberStatus,
+                        { backgroundColor: member.is_confirmed ? '#02728E' : '#FFA500' }
+                      ]}>
+                        <ThemedText style={styles.myTeamStatusText}>
+                          {member.is_confirmed ? 'Verified' : 'Pending'}
+                        </ThemedText>
+                      </View>
                     </View>
-                    <TouchableOpacity 
-                      style={styles.removeButton}
-                      onPress={() => handleRemoveTeamMember(member.user_id)}
-                    >
-                      <Ionicons name="close" size={20} color="#FF3B30" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            )}
+                  ))}
+                </View>
 
-            <TouchableOpacity style={styles.createButton} onPress={handleCreateTeam}>
-              <ThemedText style={styles.createButtonText}>Create Team</ThemedText>
-            </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[
+                    styles.paymentButton,
+                    { backgroundColor: myTeam.payment_status ? '#02728E' : '#E0E0E0' }
+                  ]}
+                  disabled={!myTeam.payment_status}
+                >
+                  <ThemedText style={[
+                    styles.paymentButtonText,
+                    { color: myTeam.payment_status ? 'white' : '#999' }
+                  ]}>
+                    {myTeam.payment_status ? 'Get Your Entry Ticket' : 'Waiting for payment completion'}
+                  </ThemedText>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         )}
 
-        {activeTab === 'join' && (
-          <View style={styles.tabContent}>
-            <View style={styles.inputSection}>
-              <ThemedText style={styles.inputLabel}>Search Team</ThemedText>
-              <SearchBar
-                placeholder="Enter team name"
-                onRecommendation={handleTeamRecommendation}
-                onSelect={handleRequestToJoinTeam}
-                renderItem={renderTeamItem}
-              />
-            </View>
+        {/* Content based on active tab - only show if not a participant */}
+        {!eventData.is_participant && (
+          <>
+            {activeTab === 'create' && (
+              <View style={styles.tabContent}>
+                <View style={styles.inputSection}>
+                  <ThemedText style={styles.inputLabel}>Team Name</ThemedText>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter team name"
+                    placeholderTextColor="#999"
+                    value={teamName}
+                    onChangeText={setTeamName}
+                  />
+                </View>
 
-            {pendingRequests.length > 0 && (
-              <View style={styles.pendingSection}>
-                <ThemedText style={styles.sectionTitle}>Pending Team requests</ThemedText>
-                {pendingRequests.map((team) => (
-                  <View key={team.team_id} style={styles.pendingRequestItem}>
-                    <Image 
-                      source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
-                      style={styles.memberAvatar} 
-                    />
-                    <View style={styles.pendingTeamInfo}>
-                      <ThemedText style={styles.pendingTeamName}>{team.team_name}</ThemedText>
-                      <ThemedText style={styles.pendingTeamLeader}>{team.leader_name}</ThemedText>
-                      <ThemedText style={styles.pendingTeamMembers}>
-                        {team.current_member}/{team.max_member}
-                      </ThemedText>
-                    </View>
-                    <TouchableOpacity 
-                      style={styles.cancelButton}
-                      onPress={() => handleCancelRequest(team.team_id)}
-                    >
-                      <Ionicons name="close" size={20} color="#FF3B30" />
-                    </TouchableOpacity>
+                <View style={styles.inputSection} >
+                  <ThemedText style={styles.inputLabel}>Search Team members</ThemedText>
+                  <SearchBar
+                    placeholder="Enter username"
+                    onRecommendation={handleUserRecommendation}
+                    onSelect={handleAddTeamMember}
+                    renderItem={renderUserItem}
+                  />
+                </View>
+
+                {teamMembers.length > 0 && (
+                  <View style={styles.teamSection}>
+                    <ThemedText style={styles.sectionTitle}>Your Team</ThemedText>
+                    {teamMembers.map((member) => (
+                      <View key={member.user_id} style={styles.teamMemberItem}>
+                        <Image 
+                          source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
+                          style={styles.memberAvatar} 
+                        />
+                        <ThemedText style={styles.memberName}>{member.username}</ThemedText>
+                        <View style={styles.memberStatus}>
+                          <ThemedText style={styles.statusText}>
+                            {member.status === 'pending' ? 'Pending' : 'Verified'}
+                          </ThemedText>
+                        </View>
+                        <TouchableOpacity 
+                          style={styles.removeButton}
+                          onPress={() => handleRemoveTeamMember(member.user_id)}
+                        >
+                          <Ionicons name="close" size={20} color="#FF3B30" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                   </View>
-                ))}
+                )}
+
+                <TouchableOpacity style={styles.createButton} onPress={handleCreateTeam}>
+                  <ThemedText style={styles.createButtonText}>Create Team</ThemedText>
+                </TouchableOpacity>
               </View>
             )}
 
-            <View style={styles.waitingSection}>
-              <ThemedText style={styles.waitingText}>Please wait for approval</ThemedText>
-            </View>
-          </View>
+            {activeTab === 'join' && (
+              <View style={styles.tabContent}>
+                <View style={styles.inputSection}>
+                  <ThemedText style={styles.inputLabel}>Search Team</ThemedText>
+                  <SearchBar
+                    placeholder="Enter team name"
+                    onRecommendation={handleTeamRecommendation}
+                    onSelect={handleRequestToJoinTeam}
+                    renderItem={renderTeamItem}
+                  />
+                </View>
+
+                {pendingRequests.length > 0 && (
+                  <View style={styles.pendingSection}>
+                    <ThemedText style={styles.sectionTitle}>Pending Team requests</ThemedText>
+                    {pendingRequests.map((team) => (
+                      <View key={team.team_id} style={styles.pendingRequestItem}>
+                        <Image 
+                          source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
+                          style={styles.memberAvatar} 
+                        />
+                        <View style={styles.pendingTeamInfo}>
+                          <ThemedText style={styles.pendingTeamName}>{team.team_name}</ThemedText>
+                          <ThemedText style={styles.pendingTeamLeader}>{team.leader_name}</ThemedText>
+                          <ThemedText style={styles.pendingTeamMembers}>
+                            {team.current_member}/{team.max_member}
+                          </ThemedText>
+                        </View>
+                        <TouchableOpacity 
+                          style={styles.cancelButton}
+                          onPress={() => handleCancelRequest(team.team_id)}
+                        >
+                          <Ionicons name="close" size={20} color="#FF3B30" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                <View style={styles.waitingSection}>
+                  <ThemedText style={styles.waitingText}>Please wait for approval</ThemedText>
+                </View>
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -413,7 +470,7 @@ const RegisterEvent = () => {
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirmButton} onPress={confirmJoinRequest}>
                 {apiCalling ? <ActivityIndicator color='#ffffff'/> :
-                <ThemedText style={styles.modalConfirmText}>Confirm</ThemedText>
+                  <ThemedText style={styles.modalConfirmText}>Confirm</ThemedText>
                 }
               </TouchableOpacity>
             </View>
@@ -674,6 +731,80 @@ const styles = StyleSheet.create({
   waitingText: {
     fontSize: 16,
     color: Colors.registerPrimary,
+    fontWeight: '600',
+  },
+  myTeamContainer: {
+    marginTop: -30,
+    marginBottom: 24,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    zIndex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  myTeamLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#02728E',
+    marginBottom: 8,
+  },
+  myTeamName: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+  },
+  teamMembersList: {
+    marginBottom: 24,
+  },
+  myTeamMemberItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  myTeamMemberAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  myTeamMemberName: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  myTeamMemberStatus: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  myTeamStatusText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  paymentButton: {
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  paymentButtonText: {
+    fontSize: 16,
     fontWeight: '600',
   },
   modalOverlay: {

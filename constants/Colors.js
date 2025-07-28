@@ -1,6 +1,6 @@
 export const Colors = {
     primary: '#02728E',
-    secondary: '#CEEBF2',
+    secondary: 'rgba(206, 235, 242, 1)',
     teal: '#02728E',
     warning: 'orange',
     registerPrimary: '#02728E',
