@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#E0E0E0',
+    color: '#000000'
   },
   error: {
     color: '#FF3B30',

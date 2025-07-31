@@ -21,7 +21,7 @@ export default function Register() {
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleRegister = async () => {
-    if (!username.trim()) return setError('Username is required.');
+    // if (!username.trim()) return setError('Username is required.');
     if (!email.trim()) return setError('Email is required.');
     if (!isValidEmail(email)) return setError('Enter a valid email address.');
     if (!password.trim()) return setError('Password is required.');
@@ -32,7 +32,7 @@ export default function Register() {
 
     try {
       setLoading(true);
-      await register({ username, email_id: email, password });
+      await register({ email_id: email, password });
       setLoading(false);
       router.replace(`/verify?email_id=${encodeURIComponent(email)}`);
     } catch (error) {
@@ -71,14 +71,14 @@ export default function Register() {
 
 
         {/* Form */}
-        <View style={styles.form}>
+        {/* <View style={styles.form}>
           <TextInput
             placeholder="Username"
             value={username}
             onChangeText={setUsername}
             style={styles.input}
             placeholderTextColor="#999"
-          />
+          /> */}
 
           <TextInput
             placeholder="Email"
@@ -127,7 +127,7 @@ export default function Register() {
             <Link href="/login" style={styles.loginLink}>Login Now</Link>
           </View>
         </View>
-      </View>
+      {/* </View> */}
     </TouchableWithoutFeedback>
   );
 }
@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#E0E0E0',
+    color: '#000'
   },
   error: {
     color: '#FF3B30',

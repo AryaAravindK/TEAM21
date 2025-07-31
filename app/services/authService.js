@@ -1,8 +1,8 @@
 import api from '../../lib/axios'
 
-export const registerAccount = async ({username, email_id, password}) => {
+export const registerAccount = async ({email_id, password}) => {
     try {
-    const resp = await api.post('/auth/signup',{username,email_id,password})
+    const resp = await api.post('/auth/signup',{email_id,password})
     return resp
 } catch (error) {
         throw error
@@ -43,3 +43,15 @@ export const getUserById = async (user_id) => {
         throw error;
     }
 };
+
+export const testApi = async ()=>{
+    try{
+        const response =  await api.get('/auth/test');
+        console.log("Api working")
+    }
+    catch(error){
+        console.log("Api not working")
+        console.log(error.response.data)
+        throw error;
+    }
+}

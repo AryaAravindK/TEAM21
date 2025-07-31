@@ -1,10 +1,23 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 import { useAuth } from './hooks/useAuth';
+import api from '../lib/axios'
+import { testApi } from './services/authService'
 
 const Home = () => {
   const { user } = useAuth();
+
+  useEffect(()=>{
+    console.log("testing api ")
+    try{
+      const resp = testApi();
+
+    }catch(error){
+      console.log("error caught in index")
+    }
+
+  })
 
   const handleGetStarted = () => {
     if (user?.authenticated) {

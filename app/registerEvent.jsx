@@ -22,6 +22,7 @@ import ThemedText from '../components/ThemedText';
 import SearchBar from '../components/SearchBar';
 import { LinearGradient } from 'expo-linear-gradient';
 import Spacer from '../components/Spacer'
+import { useAuth } from './hooks/useAuth';
 
 const RegisterEvent = () => {
   const { event_id } = useLocalSearchParams();
@@ -39,6 +40,8 @@ const RegisterEvent = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ visible: false, team: null,teamFull: false });
   const [teamFull , setTeamFull] = useState(false)
+
+  const { userDetails } = useAuth()
 
 
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
@@ -101,7 +104,7 @@ const RegisterEvent = () => {
     if(!pendingRequests.find(req => req.team_id === confirmModal.team.team_id)){
       try {
       setApiCalling(true)
-      await requestToJoinTeam(confirmModal.team.team_id);
+      await requestToJoinTeam(confirmModal.team.team_id, userDetails.user_id);
       setPendingRequests([...pendingRequests, confirmModal.team]);
       setApiCalling(false)
       setConfirmModal({ visible: false, team: null, teamFull:false });

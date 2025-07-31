@@ -113,7 +113,7 @@ export function AuthProvider({ children }) {
 
   async function register({ username, email_id, password }) {
     try {
-      const resp = await registerAccount({ username, email_id, password });
+      const resp = await registerAccount({ email_id, password });
       console.log(resp);
     } catch (error) {
       throw error;

@@ -57,9 +57,9 @@ export const createTeam = async (teamData) => {
   }
 };
 
-export const requestToJoinTeam = async (teamId) => {
+export const requestToJoinTeam = async (teamId, userID) => {
   try {
-    const response = await api.post('/teams/join', { team_id: teamId });
+    const response = await api.post('/teams/join', { team_id: teamId, user_id: userID});
     return response.data;
   } catch (error) {
     if (error.status == 400){
