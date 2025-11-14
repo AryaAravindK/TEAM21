@@ -39,7 +39,9 @@ const EventDetails = () => {
           description: data.rules || 'No description provided.',
           image: 'https://images.pexels.com/photos/1752757/pexels-photo-1752757.jpeg?auto=compress&cs=tinysrgb&w=800',
           attendees: `${data.registered}+ Going`,
+          is_participant: data.is_participant
         });
+        console.log(data)
       } catch (err) {
         console.log(err);
       } finally {
@@ -126,9 +128,15 @@ const EventDetails = () => {
       ]}>
         <TouchableOpacity
           style={[styles.registerButton, { backgroundColor: theme.primary }]}
-          onPress={() => router.push(`/registerEvent?event_id=${event_id}`)}
+          onPress={() => router.push(`/registerEvent?event_id=${event_id}`)  }
         >
-          <ThemedText style={styles.registerButtonText}>Register Now</ThemedText>
+          {
+            eventData.is_participant && <ThemedText style={styles.registerButtonText} >My Team</ThemedText>
+          }
+          {
+            !eventData.is_participant && <ThemedText style={styles.registerButtonText} >Register Now</ThemedText>
+          }
+          
         </TouchableOpacity>
       </View>)}
     </ThemedView>

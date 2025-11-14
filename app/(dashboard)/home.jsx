@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme } from 'react-native';
+import { StyleSheet, View, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Platform, useColorScheme, Pressable } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,7 +67,7 @@ const Home = () => {
       const res = await getEvents();
       const events = res.data || [];
 
-      const featured = events.filter(event => event.featured !== null).map(event => ({
+      const featured = events.filter(event => event.is_featured  !== 0).map(event => ({
         id: event.event_id,
         title: event.event_name,
         date: new Date(event.start_time).toDateString(),
@@ -75,7 +75,8 @@ const Home = () => {
         image: defaultEventImg,
       }));
 
-      const upcoming = events.filter(event => event.featured === null).map(event => ({
+      
+      const upcoming = events.filter(event => event.is_featured === 0).map(event => ({
         id: event.event_id,
         title: event.event_name,
         date: new Date(event.start_time).toDateString(),
@@ -83,7 +84,7 @@ const Home = () => {
         location: event.venue,
         image: defaultEventImg,
       }));
-
+      
       setFeaturedEvents(featured);
       setUpcomingEvents(upcoming);
     } catch (error) {

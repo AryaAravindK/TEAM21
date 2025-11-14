@@ -46,7 +46,7 @@ export const getUserById = async (user_id) => {
 
 export const testApi = async ()=>{
     try{
-        const response =  await api.get('/auth/test');
+        await api.get('/auth/test');
         console.log("Api working")
     }
     catch(error){

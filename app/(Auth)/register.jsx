@@ -32,9 +32,9 @@ export default function Register() {
 
     try {
       setLoading(true);
-      await register({ email_id: email, password });
-      setLoading(false);
+      await register({ username, email_id: email, password });
       router.replace(`/verify?email_id=${encodeURIComponent(email)}`);
+      setLoading(false);
     } catch (error) {
       setLoading(false);
       console.log('Register error ->', error);

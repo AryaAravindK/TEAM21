@@ -49,7 +49,7 @@ export const searchTeams = async (query, eventId) => {
 
 export const createTeam = async (teamData) => {
   try {
-    const response = await api.post('/teams/create', teamData);
+    const response = await api.post('/participants/register', teamData);
     return response.data;
   } catch (error) {
     console.error('Error creating team:', error);
