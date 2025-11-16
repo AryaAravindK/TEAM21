@@ -17,16 +17,33 @@ const Profile = () => {
   const [participationHistory, setParticipationHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fieldsToCheck = [
+    userDetails?.firstname,
+    userDetails?.lastname,
+    userDetails?.email_id,
+    userDetails?.phone,
+    userDetails?.age,
+    userDetails?.gender,
+    userDetails?.interests,
+    userDetails?.username,
+  ];
+
+  const total = fieldsToCheck.length;
+  const filled = fieldsToCheck.filter(v => v !== null && v !== undefined && v !== "").length;
+
+  const percent = Math.round((filled / total) * 100);
+
   const profileData = {
-    name: userDetails?.username ?? 'User',
+    name: userDetails?.firstname ? userDetails.firstname : userDetails?.username ? userDetails?.username : 'User',
     age: userDetails?.age ? `, ${userDetails.age}` : '',
     profileImage: userDetails?.profile_image,
-    completionPercentage: '20% Complete',
+    completionPercentage:  `${percent}% Complete`,
     participations: participationHistory.length,
     achievements: 0
   }
 
   useEffect(() => {
+    console.log("UserDetails:",userDetails)
     if (userDetails?.user_id) {
       fetchParticipationHistory();
     }

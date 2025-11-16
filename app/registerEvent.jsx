@@ -75,19 +75,20 @@ const RegisterEvent = () => {
         fees: `₹${data.entry_fee}`,
         is_participant: data.is_participant,
         is_team_event: data.is_team_event,
-        payment_status:  true // waiting for anup to add this to the response
+        payment_status: true // waiting for anup to add this to the response
 
       });
 
 
       console.log("event data:", data)
-      console.log("team data ->",data.teams[0].members);
+      console.log("team data ->", data.teams[0]?.members);
       // Set team data if user is a participant
       if (data.is_participant && data.team) {
         setMyTeam({
-          ...data.teams[0].members,
-          payment_status : true});
-        console.log("my team :",data.teams);
+          ...data.teams[0]?.members,
+          payment_status: true
+        });
+        console.log("my team :", data.teams);
       }
     } catch (error) {
       console.error('Error fetching event data:', error);
@@ -312,7 +313,7 @@ const RegisterEvent = () => {
                     <ThemedText style={styles.myTeamName}>{myTeam.team_name}</ThemedText>
 
                     <View style={styles.teamMembersList}>
-                      {myTeam.members.map((member) => (
+                      {myTeam?.members.map((member) => (
                         <View key={member.team_member_id} style={styles.myTeamMemberItem}>
                           <Image
                             source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
@@ -526,7 +527,10 @@ const RegisterEvent = () => {
             ) : (
               <TouchableOpacity
                 style={[styles.paymentButton, { backgroundColor: '#02728E' }]}
-                onPress={() => router.push('/Payments')}
+                onPress={() => router.push({
+                  pathname: '/Payments',
+                  params: { event_id: event_id }
+                })}
               >
                 <ThemedText style={[styles.paymentButtonText, { color: 'white' }]}>
                   Pay Now ({eventData.fees})
@@ -537,7 +541,7 @@ const RegisterEvent = () => {
         )}
 
         {showTicketSection && (
-          <View style={[{ alignItems: 'center', marginTop: 20, marginBottom:40, backgroundColor:'#ffffff' }, styles.myTeamContainer]}>
+          <View style={[{ alignItems: 'center', marginTop: 20, marginBottom: 40, backgroundColor: '#ffffff' }, styles.myTeamContainer]}>
             <ThemedText style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
               Entry Ticket
             </ThemedText>
